@@ -10,10 +10,7 @@ const sequelize = new Sequelize(
     {
         host: process.env.DB_HOST,
         dialect: 'postgres',
-        port: process.env.DB_PORT,  // DB_PORT eklemek iyi bir uygulamadır
+        port: process.env.DB_PORT,  
     }
 );
-
-
-
 module.exports = sequelize;

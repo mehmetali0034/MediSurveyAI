@@ -1,12 +1,23 @@
 const express = require('express');
-const { register, login } = require('../controllers/authController');
-const { isAdmin } = require('../middlewares/auth');
-
 const router = express.Router();
+const { 
+  adminRegisterDoctor, 
+  registerDoctor, 
+  loginDoctor, 
+  registerTenant, 
+  loginTenant 
+} = require('../controllers/authController');
 
-router.post('/register', register); 
-router.post('/login', login); 
+const {adminDoctorOnlyMiddleware, tenantOnlyMiddleware} = require('../middlewares/auth');
 
-router.post('/admin/add-doctor', isAdmin, register); 
+router.post('/tenant/register-doctor', tenantOnlyMiddleware, adminRegisterDoctor);
+
+router.post('/admin/register-doctor', adminDoctorOnlyMiddleware, registerDoctor);
+
+router.post('/login-doctor', loginDoctor);
+
+router.post('/tenant/register', registerTenant);
+
+router.post('/tenant/login', loginTenant);
 
 module.exports = router;

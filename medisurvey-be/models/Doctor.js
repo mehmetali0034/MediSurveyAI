@@ -1,47 +1,54 @@
-require('dotenv').config();  
-const { Sequelize, DataTypes } = require('sequelize'); 
-const sequelize = require('../config/database'); 
+const { DataTypes } = require('sequelize');
+const db = require('../config/database');
+const Tenant = require('./Tenant');
+const { v4: uuidv4 } = require('uuid');
 
-const Doctor = sequelize.define('Doctor', {
+const Doctor = db.define('Doctor', {
   id: {
-    type: DataTypes.INTEGER,
-    autoIncrement: true,
-    primaryKey: true
+    type: DataTypes.UUID,
+    defaultValue: uuidv4,
+    primaryKey: true,
   },
   name: {
     type: DataTypes.STRING,
-    allowNull: false
+    allowNull: false,
   },
   surname: {
     type: DataTypes.STRING,
-    allowNull: false
-  },
-  specialty: {
-    type: DataTypes.STRING,
-    allowNull: false
-  },
-  phone: {
-    type: DataTypes.STRING,
-    allowNull: false
+    allowNull: false,
   },
   email: {
     type: DataTypes.STRING,
     allowNull: false,
-    unique: true
+    unique: true,
   },
-  password: {  
+  password: {
     type: DataTypes.STRING,
-    allowNull: false
+    allowNull: false,
   },
   role: {
     type: DataTypes.STRING,
-    defaultValue: 'doctor'  
-  }
-}, {
-  tableName: 'doctors', 
-  timestamps: true,     
-  createdAt: 'created_at',
-  updatedAt: 'updated_at'  
-});
+    allowNull: false,
+    defaultValue: 'doctor',
+  },
+  specialization: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  phone_number: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  tenant_id: {
+    type: DataTypes.UUID, 
+    references: {
+      model: Tenant,
+      key: 'id'
+    },
+    allowNull: false,
+  },
+}, {});
+
+Doctor.belongsTo(Tenant, { foreignKey: 'tenant_id' });
 
 module.exports = Doctor;
