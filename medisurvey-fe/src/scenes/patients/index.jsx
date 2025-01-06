@@ -5,6 +5,8 @@ import {mockDataContacts} from "../../data/mockData"
 import Headeer from '../../components/Headeer';
 import { tokens } from '../../theme';
 import { useTheme } from '@emotion/react';
+import Buttonn from '../../components/Buttonn';
+import AddCircleIcon from "@mui/icons-material/AddCircle";
 
 export default function Patients() {
   const theme = useTheme();
@@ -65,7 +67,14 @@ export default function Patients() {
   ];
   return (
     <Box sx={{ marginLeft:2 , marginRight:2 }} >
+      <Box sx={{display:"flex", justifyContent:"space-between",alignItems: "center"}}>
       <Headeer title="PATIENTS" subtitle="List of Contacts for Future Reference"/>
+      <Buttonn >
+          Add Patients
+          <AddCircleIcon sx={{ marginLeft: "8px" }} />
+        </Buttonn>
+      </Box>
+  
       <Box
       height="120vh"
       sx={{
@@ -100,7 +109,6 @@ export default function Patients() {
         <DataGrid checkboxSelection rows={mockDataContacts}
         columns={columns} components={{ Toolbar: GridToolbar }} />
       </Box>
-
     </Box>
   )
 }

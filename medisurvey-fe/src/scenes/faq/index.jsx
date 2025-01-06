@@ -20,13 +20,12 @@ export default function Faq() {
         <Accordion >
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             <Typography variant="h5" color={colors.greenAccent[500]}>
-              An Important Question
+            Can a doctor playing the doctor role who is not an admin create a master file?
             </Typography>
           </AccordionSummary>
           <AccordionDetails expandIcon={<ExpandMoreIcon />}>
             <Typography>
-              Nulla facilisi. Phasellus sollicitudin nulla et quam mattis
-              feugiat. Aliquam eget maximus est, id dignissim quam.
+            The doctor in the Normal Doctor role cannot create a master file. Only the doctors with the Admin doctor role can create a master file.
             </Typography>
           </AccordionDetails>
         </Accordion>

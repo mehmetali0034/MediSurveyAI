@@ -15,6 +15,7 @@ import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
 import MapOutlinedIcon from "@mui/icons-material/MapOutlined";
 import { Box, IconButton, Typography, useTheme } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
 
 export default function Sidebaar() {
   const theme = useTheme(); //useTheme hook'u, ThemeProvider tarafından sağlanan temayı almanıza yardımcı olur.
@@ -24,7 +25,7 @@ export default function Sidebaar() {
   const navigate = useNavigate();
   const handleClick = () => {
     // "/other" sayfasına yönlendirme
-    navigate("/");
+    navigate("/dashboard");
   };
   const handleClickTeam = () => {
     navigate("/team");
@@ -126,6 +127,7 @@ export default function Sidebaar() {
             >
               Patients
             </MenuItem>
+            
 
             <MenuItem
               onClick={() => {
@@ -146,11 +148,19 @@ export default function Sidebaar() {
 
             <MenuItem
               onClick={() => {
-                navigate("/form");
+                navigate("/addDoctor");
               }}
               icon={<PersonOutlinedIcon />}
             >
-              Profile Form
+              Add Doctor
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                navigate("/AddPatient");
+              }}
+              icon={<PersonAddIcon />}
+            >
+              Add Patient
             </MenuItem>
             <MenuItem onClick={()=>{navigate("/calendar")}} icon={<CalendarTodayOutlinedIcon />}>Calendar</MenuItem>
             <MenuItem onClick={()=>{navigate("/faq")}} icon={<HelpOutlineOutlinedIcon />}>Faq Page</MenuItem>

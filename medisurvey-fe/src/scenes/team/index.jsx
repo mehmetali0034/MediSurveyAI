@@ -81,7 +81,7 @@ export default function Team() {
       >
         <Headeer title="TEAM" subtitle="Managing Team Members" />
         <Buttonn onClick={clickToAddDoktor}>
-          Add Doktor
+          Add Doctor
           <AddCircleIcon sx={{ marginLeft: "8px" }} />
         </Buttonn>
       </Box>

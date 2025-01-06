@@ -1,4 +1,11 @@
-import { Alert, Box, Button, Snackbar, TextField } from "@mui/material";
+import {
+  Alert,
+  Autocomplete,
+  Box,
+  Button,
+  Snackbar,
+  TextField,
+} from "@mui/material";
 import React, { useState } from "react";
 import Headeer from "../../components/Headeer";
 import * as Yup from "yup";
@@ -14,8 +21,8 @@ export default function Form() {
     lastName: "",
     email: "",
     contact: "",
-    address1: "",
-    address2: "",
+    speciality: "",
+    role: "",
   };
   const SignupSchema = Yup.object().shape({
     firstName: Yup.string().required("This Field is Required."),
@@ -24,8 +31,9 @@ export default function Form() {
     contact: Yup.string()
       .matches(/^\+?[1-9]\d{1,14}$/, "Phone Number is not Valid.")
       .required("This field is Required."),
-    address1: Yup.string().required("This Field is Required."),
-    address2: Yup.string().required("This Field is Required."),
+    speciality: Yup.string().required("This Field is Required."),
+    role: Yup.string().required("Role is required"),
+    files: Yup.string().required("Role is required"),
   });
   const isNonMobile = useMediaQuery("(min-width:600px)");
   const [openSnack, setOpenSnack] = useState(false);
@@ -45,6 +53,10 @@ export default function Form() {
 const value = "someValue";
 const booleanValue = !!value; // true (eğer value boş değilse)
 */
+
+  const roles = ["Admin", "User"];
+  const files = ["Ön Çarpraz Bağ", "Tendon"];
+
   return (
     <Box marginLeft={2} marginRight={2}>
       <Headeer title="ADD DOCTOR" subtitle="Add a New Doctor Profile" />
@@ -60,6 +72,7 @@ const booleanValue = !!value; // true (eğer value boş değilse)
           handleBlur, //Bir form alanından çıkıldığında (blur) çağrılan bir olay dinleyicisidir. Özellikle form alanlarına dokunma durumunu (touched) güncellemek için kullanılır.
           handleChange, //Bir form alanının değeri değiştiğinde çağrılan bir olay dinleyicisidir. Form alanlarının değerlerini güncellemek için kullanılır.
           handleSubmit, // Form gönderildiğinde çağrılan bir fonksiyondur. Genellikle formun doğrulama (validation) işlemleri başarılı olduğunda form verilerini sunucuya göndermek için kullanılır.
+          setFieldValue,
         }) => (
           <form onSubmit={handleSubmit}>
             <Box
@@ -107,7 +120,7 @@ const booleanValue = !!value; // true (eğer value boş değilse)
                 onChange={handleChange}
                 label="Email"
                 helperText={touched.email && errors.email}
-                sx={{ gridColumn: "span 4" }}
+                sx={{ gridColumn: "span 2" }}
               />
               <TextField
                 type="number"
@@ -119,42 +132,60 @@ const booleanValue = !!value; // true (eğer value boş değilse)
                 onChange={handleChange}
                 error={Boolean(touched.contact && errors.contact)}
                 helperText={touched.contact && errors.contact}
-                sx={{ gridColumn: "span 4" }}
+                sx={{ gridColumn: "span 2" }}
               />
               <TextField
                 type="text"
-                name="address1"
-                label="Address 1"
+                name="speciality"
+                label="Speciality "
                 variant="filled"
-                value={values.address1}
-                error={Boolean(touched.address1 && errors.address1)}
-                helperText={touched.address1 && errors.address1}
+                value={values.speciality}
+                error={Boolean(touched.speciality && errors.speciality)}
+                helperText={touched.speciality && errors.speciality}
                 onBlur={handleBlur}
                 onChange={handleChange}
-                sx={{ gridColumn: "span 4" }}
+                sx={{ gridColumn: "span 2" }}
               />
-              <TextField
-                type="text"
-                name="address2"
-                label="Address 2"
-                variant="filled"
-                value={values.address2}
-                error={Boolean(touched.address2 && errors.address2)}
-                helperText={touched.address2 && errors.address2}
-                onBlur={handleBlur}
-                onChange={handleChange}
-                sx={{ gridColumn: "span 4" }}
+              <Autocomplete
+                options={roles}
+                onChange={(event, newValue) => setFieldValue("role", newValue)}
+                value={values.role || ""} // Eğer role değeri undefined veya null ise boş string olarak ayarlanır
+                sx={{ gridColumn: "span 1" }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Role"
+                    variant="outlined"
+                    error={Boolean(touched.role && errors.role)}
+                    helperText={touched.role && errors.role}
+                  />
+                )}
+              />
+
+              <Autocomplete
+                options={files}
+                onChange={(event, newValue) => setFieldValue("files", newValue)}
+                value={values.files || ""} // Eğer files değeri undefined veya null ise boş string olarak ayarlanır
+                sx={{ gridColumn: "span 1" }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Files"
+                    variant="outlined"
+                    error={Boolean(touched.files && errors.files)}
+                    helperText={touched.files && errors.files}
+                  />
+                )}
               />
             </Box>
             <Box marginTop={2} display="flex" justifyContent="end">
               <Button
                 type="submit"
-                sx={{ marginRight: 0 ,  }}
+                sx={{ marginRight: 0 }}
                 variant="contained"
                 color="secondary"
-                
               >
-                CREATE NEW USER
+                CREATE NEW DOCTOR
               </Button>
             </Box>
           </form>
