@@ -13,11 +13,14 @@ import Geography from "./scenes/geography";
 import Calendar from "./scenes/calendar";
 import Patients from "./scenes/patients";
 import Files from "./scenes/files";
-import Login from "./scenes/loginn";
 import AddPatient from "./scenes/addpatient";
 import Marketing from "./scenes/marketing";
 import Sidebaar from "./scenes/global/SideBaar";
 import Topbar from "./scenes/global/Topbar";
+import TenantRegister from "./scenes/register/TenantRegister";
+import CorporateLogin from "./scenes/loginn/CorporateLogin";
+import IndividualLogin from "./scenes/loginn/IndividualLogin";
+import TenDashboard from "./scenes/dashboard/TenDashboard";
 
 function App() {
   const [theme, colorMode] = useMode();
@@ -30,15 +33,12 @@ function App() {
         <div className="app">
           <Routes>
             {/* Başlangıçta Marketing sayfasına yönlendirme */}
-            <Route path="/" element={<Navigate to="/MediSurveyAI" />} />
-
-            {/* Login rotası */}
-            <Route path="/login" element={<Login />} />
-
-            {/* Marketing sayfası, burada Sidebar ve Topbar'ı göstermiyoruz */}
+            <Route path="/" element={<Navigate to="/MediSurveyAI" />} />      
+            <Route path="/individual-login" element={<IndividualLogin />} />
+            <Route path="/corporate-login" element={<CorporateLogin />} />
             <Route path="/MediSurveyAI" element={<Marketing />} />
-
-            {/* Giriş yapıldıktan sonraki sayfalar, Sidebar ve Topbar olacak */}
+            <Route path="/tenantRegister" element={<TenantRegister />} />
+            <Route path="/tenant/dashboard" element={<TenDashboard />} />
             <Route
               path="/*"
               element={
@@ -47,6 +47,7 @@ function App() {
                   <main className="content">
                     <Topbar setIsSidebar={setIsSidebar} />
                     <Routes>
+                    
                       <Route path="/dashboard" element={<Dashboard />} />
                       <Route path="/team" element={<Team />} />
                       <Route path="/bar" element={<Bar />} />
