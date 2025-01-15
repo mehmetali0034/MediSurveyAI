@@ -1,12 +1,13 @@
 const { DataTypes } = require('sequelize');
 const db = require('../config/database');
 const { v4: uuidv4 } = require('uuid');
+const bcrypt = require('bcrypt');  // bcrypt'i dahil et
 
 const Tenant = db.define('Tenant', {
   id: {
     type: DataTypes.UUID,
     primaryKey: true,
-    defaultValue: uuidv4, 
+    defaultValue: uuidv4,
   },
   name: {
     type: DataTypes.STRING,
@@ -29,10 +30,16 @@ const Tenant = db.define('Tenant', {
     type: DataTypes.STRING,
     allowNull: false,
   },
+  password: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
   active: {
     type: DataTypes.BOOLEAN,
     defaultValue: true,
   },
-}, {});
+}, {
+  tableName: 'tenants',
+});
 
 module.exports = Tenant;

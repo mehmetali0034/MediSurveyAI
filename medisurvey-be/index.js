@@ -5,6 +5,8 @@ const db = require('./config/database');
 const Auth = require('./routes/auth');
 const doctorRoutes = require('./routes/doctor');
 const tenantRoutes = require('./routes/tenants');
+const patientRoutes = require('./routes/patient');
+const { Tenant, Doctor, Patient } = require('./models');
 
 dotenv.config();
 
@@ -12,13 +14,14 @@ const init = async () => {
     try {
         await db.authenticate();
         console.log('Veritabanına başarıyla bağlanıldı!');
-        await db.sync({ force: true }); 
-        console.log('Veritabanı ve tablolar başarıyla oluşturuldu!');
-        
+        await db.sync({ force: false });
+        console.log('Veritabanı ve tablolar başarıyla senkronize edildi!');
     } catch (error) {
-        console.error('Hata oluştu:', error);
+        console.error('Hata oluştu:', error.message);
+        console.error('Detaylar:', error);
     }
 };
+
 
 init();
 
@@ -30,6 +33,7 @@ app.use(express.json({ limit: '30mb', extended: true }));
 app.use(express.urlencoded({ limit: '30mb', extended: true }));
 
 app.use('/api/doctors', doctorRoutes); 
+app.use('/api/patients', patientRoutes); 
 app.use('/api/tenants', tenantRoutes); 
 app.use('/api/auth', Auth); 
 

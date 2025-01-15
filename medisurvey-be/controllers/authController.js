@@ -96,60 +96,52 @@ const registerDoctor = async (req, res) => {
 
 const registerTenant = async (req, res) => {
   try {
-    const { name, address, phone_number, email, plan_type } = req.body;
+    const { name, address, phone_number, email, plan_type, password, password_confirmation } = req.body;
 
-    const existingTenantByEmail = await Tenant.findOne({ where: { email } });
-    if (existingTenantByEmail) {
-      return res.status(400).json({ error: 'Bu e-posta adresi zaten kullanılıyor.' });
+    // Şifre doğrulama
+    if (password !== password_confirmation) {
+      return res.status(400).json({ error: 'Şifreler uyuşmuyor.' });
     }
 
-    const existingTenantByPhone = await Tenant.findOne({ where: { phone_number } });
-    if (existingTenantByPhone) {
-      return res.status(400).json({ error: 'Bu telefon numarası zaten bir kurum tarafından kullanılıyor.' });
-    }
+    // Şifreyi hash'leme
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-    const newTenant = await Tenant.create({
+    const tenant = await Tenant.create({
       name,
       address,
       phone_number,
       email,
       plan_type,
+      password: hashedPassword,
     });
 
-    const token = jwt.sign({ id: newTenant.id }, 'secretkey', { expiresIn: '1h' });
-
-    res.status(201).json({ tenant: newTenant, token });
+    res.status(201).json({ message: 'Kurum başarıyla oluşturuldu.', tenant });
   } catch (error) {
-    res.status(500).json({ error: 'Kurum kaydı sırasında bir hata oluştu.', details: error.message });
+    res.status(500).json({ error: 'Kurum oluşturulurken bir hata oluştu.' });
   }
 };
 
 const loginTenant = async (req, res) => {
   try {
-    const { email, phone_number } = req.body;
-    const tenant = await Tenant.findOne({ where: { email, phone_number } });
+    const { phone_number, password } = req.body;
+
+    const tenant = await Tenant.findOne({ where: { phone_number } });
 
     if (!tenant) {
-      return res.status(400).json({ error: 'Kurum bilgileri bulunamadı.' });
+      return res.status(404).json({ error: 'Kurum bulunamadı.' });
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, tenant.password);
+
+    if (!isPasswordValid) {
+      return res.status(401).json({ error: 'Geçersiz şifre.' });
     }
 
     const token = jwt.sign({ id: tenant.id }, 'secretkey', { expiresIn: '1h' });
 
-    const responseData = {
-      token,
-      tenant: {
-        id: tenant.id,
-        name: tenant.name,
-        email: tenant.email,
-        address: tenant.address,
-        phone_number: tenant.phone_number,
-        plan_type: tenant.plan_type,
-      },
-    };
-
-    res.status(200).json(responseData);
+    res.status(200).json({ message: 'Giriş başarılı.', token });
   } catch (error) {
-    res.status(500).json({ error: 'Kurum girişi sırasında bir hata oluştu.', details: error.message });
+    res.status(500).json({ error: 'Giriş yapılırken bir hata oluştu.' });
   }
 };
 

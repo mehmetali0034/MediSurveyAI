@@ -9,7 +9,29 @@ const getAllDoctors = async (req, res) => {
     res.status(500).json({ error: 'Doktor bilgileri alınırken bir hata oluştu.' });
   }
 };
+const getDoctorInfo = async (req, res) => {
+  try {
+    const token = req.headers['authorization']?.split(' ')[1];
+    const decoded = jwt.verify(token, 'secretkey');
+    const jwtTenantId = decoded.id;
 
+    const doctorId = req.params.doctorId;
+
+    const doctor = await Doctor.findOne({ where: { id: doctorId } });
+
+    if (!doctor) {
+      return res.status(404).json({ error: 'Doktor bulunamadı.' });
+    }
+
+    if (doctor.tenant_id !== jwtTenantId) {
+      return res.status(403).json({ error: 'Bu doktora erişim yetkiniz yok.' });
+    }
+
+    res.status(200).json(doctor);
+  } catch (error) {
+    res.status(500).json({ error: 'Doktor bilgileri alınırken bir hata oluştu.' });
+  }
+};
 const updateDoctor = async (req, res) => {
   try {
     const token = req.headers['authorization']?.split(' ')[1];
@@ -68,4 +90,4 @@ const deleteDoctor = async (req, res) => {
   }
 };
 
-module.exports = { getAllDoctors, updateDoctor, deleteDoctor };
+module.exports = { getAllDoctors, updateDoctor, deleteDoctor ,getDoctorInfo};
