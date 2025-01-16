@@ -114,8 +114,9 @@ const registerTenant = async (req, res) => {
       plan_type,
       password: hashedPassword,
     });
+    const token = jwt.sign({ id: tenant.id }, 'secretkey', { expiresIn: '1h' });
 
-    res.status(201).json({ message: 'Kurum başarıyla oluşturuldu.', tenant });
+    res.status(201).json({ message: 'Kurum başarıyla oluşturuldu.', tenant ,token});
   } catch (error) {
     res.status(500).json({ error: 'Kurum oluşturulurken bir hata oluştu.' });
   }
