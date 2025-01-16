@@ -18,7 +18,6 @@ const getTenantInfo = async (req, res) => {
 
     const tenantId = req.params.tenantId;
 
-    // Erişim yetkisi kontrolü
     if (tenantId !== jwtTenantId) {
       return res.status(403).json({ error: 'Bu kuruma erişim yetkiniz yok.' });
     }
@@ -44,7 +43,6 @@ const updateTenant = async (req, res) => {
     const tenantId = req.params.tenantId;
     const { name, address, phone_number, email, plan_type, password, password_confirmation } = req.body;
 
-    // Şifre doğrulama (eğer şifre değiştirilecekse)
     if (password && password !== password_confirmation) {
       return res.status(400).json({ error: 'Şifreler uyuşmuyor.' });
     }
@@ -66,7 +64,6 @@ const updateTenant = async (req, res) => {
     tenantToUpdate.email = email || tenantToUpdate.email;
     tenantToUpdate.plan_type = plan_type || tenantToUpdate.plan_type;
 
-    // Şifre değişikliği
     if (password) {
       tenantToUpdate.password = await bcrypt.hash(password, 10);
     }

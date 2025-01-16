@@ -2,7 +2,6 @@ const Tenant = require('./Tenant');
 const Doctor = require('./Doctor');
 const Patient = require('./Patient');
 
-// İlişkiler
 Tenant.hasMany(Doctor, { foreignKey: 'tenant_id' });
 Doctor.belongsTo(Tenant, { foreignKey: 'tenant_id' });
 

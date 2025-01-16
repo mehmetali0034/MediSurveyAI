@@ -49,6 +49,5 @@ const Doctor = db.define('Doctor', {
   },
 }, {});
 
-Doctor.belongsTo(Tenant, { foreignKey: 'tenant_id' });
 
 module.exports = Doctor;

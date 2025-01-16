@@ -98,12 +98,10 @@ const registerTenant = async (req, res) => {
   try {
     const { name, address, phone_number, email, plan_type, password, password_confirmation } = req.body;
 
-    // Şifre doğrulama
     if (password !== password_confirmation) {
       return res.status(400).json({ error: 'Şifreler uyuşmuyor.' });
     }
 
-    // Şifreyi hash'leme
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const tenant = await Tenant.create({

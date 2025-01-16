@@ -6,7 +6,6 @@ const Auth = require('./routes/auth');
 const doctorRoutes = require('./routes/doctor');
 const tenantRoutes = require('./routes/tenants');
 const patientRoutes = require('./routes/patient');
-const { Tenant, Doctor, Patient } = require('./models');
 
 dotenv.config();
 
@@ -14,7 +13,7 @@ const init = async () => {
     try {
         await db.authenticate();
         console.log('Veritabanına başarıyla bağlanıldı!');
-        await db.sync({ force: false });
+        await db.sync({ force: true });
         console.log('Veritabanı ve tablolar başarıyla senkronize edildi!');
     } catch (error) {
         console.error('Hata oluştu:', error.message);
