@@ -9,5 +9,7 @@ export default class DoctorService{
               }
         )
     }
-
+    doctorLogin(doctorData){
+      return axios.post("http://localhost:3000/api/auth/login-doctor",doctorData)
+    }
 }
