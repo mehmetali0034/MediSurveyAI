@@ -34,9 +34,10 @@ export default function SidebarComponent({ isSidebar, darkMode, setDarkMode }) {
         }}
         onClick={() => setSelected(title)}
         icon={icon}
+        component={Link}
+        to={to}
       >
         <Typography>{title}</Typography>
-        <Link to={to} />
       </MenuItem>
     );
   };
