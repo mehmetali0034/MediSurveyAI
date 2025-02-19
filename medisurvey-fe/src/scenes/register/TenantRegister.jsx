@@ -2,242 +2,430 @@ import {
   Alert,
   Box,
   Button,
+  Container,
+  IconButton,
+  InputAdornment,
+  Paper,
   Snackbar,
   TextField,
   Typography,
   useTheme,
+  Stepper,
+  Step,
+  StepLabel,
 } from "@mui/material";
 import React, { useState } from "react";
-import TopBarOfMarketing from "../../components/TopBarOfMarketing";
-import { tokens } from "../../theme";
-import * as Yup from "yup";
-import { Formik, Form } from "formik";
-import TenantService from "../../services/tenantService";
 import { useNavigate } from "react-router-dom";
+import { tokens } from "../../theme";
+import { motion } from "framer-motion";
+import TopBarOfMarketing from "../../components/TopBarOfMarketing";
+import Footer from "../../components/Footer";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+import BusinessIcon from "@mui/icons-material/Business";
+import PhoneIcon from "@mui/icons-material/Phone";
+import EmailIcon from "@mui/icons-material/Email";
+import LocationOnIcon from "@mui/icons-material/LocationOn";
+import LockIcon from "@mui/icons-material/Lock";
+import authService from "../../services/authService";
 
-export default function TenantRegister() {
+export default function TenantRegister({ darkMode, setDarkMode }) {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-  const [openSnackBar, setOpenSnackBar] = useState(false);
-  const tenantService = new TenantService();
   const navigate = useNavigate();
-
-  const initialValues = {
+  const [showPassword, setShowPassword] = useState(false);
+  const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
+  const [openSnackBar, setOpenSnackBar] = useState(false);
+  const [activeStep, setActiveStep] = useState(0);
+  const [formData, setFormData] = useState({
     name: "",
-    email: "",
-    phone_number: "",
     address: "",
-    plan_type: "",
-  };
-
-  const validationSchema = Yup.object({
-    name: Yup.string().required("Name is required"),
-    email: Yup.string()
-      .email("Invalid email address")
-      .required("Email is required"),
-    phone_number: Yup.string()
-      .matches(/^[0-9]+$/, "Phone number must contain only digits")
-      .required("Phone number is required"),
-    address: Yup.string().required("Address is required"),
-    plan_type: Yup.string().required("Plan Type is required"),
+    phone_number: "",
+    email: "",
+    plan_type: "basic",
+    password: "",
+    password_confirmation: "",
   });
+  const [error, setError] = useState("");
 
-  const handleSubmit = (values, { setSubmitting, resetForm }) => {
-    tenantService
-      .tenantRegister({
-        name: values.name,
-        email: values.email,
-        phone_number: values.phone_number,
-        address: values.address,
-        plan_type: values.plan_type,
-      })
-      .then((response) => {
-        console.log("Tenant successfully registered:", response.data);
-        resetForm();
-        setOpenSnackBar(true);
-      })
-      .catch((error) => {
-        console.error("Error registering tenant:", error);
-      })
-      .finally(() => {
-        setSubmitting(false);
+  const steps = ["Kurum Bilgileri", "İletişim Bilgileri", "Hesap Bilgileri"];
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
       });
   };
 
-  const handleCloseSnackBar = () => {
-    setOpenSnackBar(false);
+  const handleNext = () => {
+    setActiveStep((prevStep) => prevStep + 1);
+  };
+
+  const handleBack = () => {
+    setActiveStep((prevStep) => prevStep - 1);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (activeStep !== steps.length - 1) {
+      handleNext();
+      return;
+    }
+    
+    setError("");
+    try {
+      const response = await authService.tenantRegister(formData);
+      setOpenSnackBar(true);
+      setTimeout(() => {
+        navigate("/corporate-login");
+      }, 1000);
+    } catch (err) {
+      setError(err.response?.data?.error || "Kayıt sırasında bir hata oluştu");
+    }
+  };
+
+  const renderStepContent = (step) => {
+    const commonTextFieldProps = {
+      fullWidth: true,
+      sx: {
+        "& .MuiOutlinedInput-root": {
+          borderRadius: "12px",
+          "&:hover fieldset": {
+            borderColor: colors.greenAccent[500],
+          },
+        },
+        "& .MuiInputBase-input": {
+          color: darkMode ? "white" : colors.grey[900],
+        },
+        "& .MuiInputLabel-root": {
+          color: darkMode ? "rgba(255, 255, 255, 0.7)" : colors.grey[500],
+        },
+        mb: 3,
+      },
+    };
+
+    switch (step) {
+      case 0:
+        return (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <Typography variant="body2" sx={{ mb: 1, color: darkMode ? "white" : colors.grey[900] }}>
+              Kurum Adı
+            </Typography>
+            <TextField
+              {...commonTextFieldProps}
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              placeholder="Kurum Adı"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <BusinessIcon sx={{ color: darkMode ? "rgba(255, 255, 255, 0.7)" : colors.grey[500] }} />
+                  </InputAdornment>
+                ),
+              }}
+            />
+
+            <Typography variant="body2" sx={{ mb: 1, color: darkMode ? "white" : colors.grey[900] }}>
+              Adres
+            </Typography>
+            <TextField
+              {...commonTextFieldProps}
+              name="address"
+              value={formData.address}
+              onChange={handleChange}
+              placeholder="Adres"
+              multiline
+              rows={2}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <LocationOnIcon sx={{ color: darkMode ? "rgba(255, 255, 255, 0.7)" : colors.grey[500] }} />
+                  </InputAdornment>
+                ),
+              }}
+            />
+          </motion.div>
+        );
+      case 1:
+        return (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <Typography variant="body2" sx={{ mb: 1, color: darkMode ? "white" : colors.grey[900] }}>
+              Telefon Numarası
+            </Typography>
+            <TextField
+              {...commonTextFieldProps}
+              name="phone_number"
+              value={formData.phone_number}
+              onChange={handleChange}
+              placeholder="5XX XXX XX XX"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <PhoneIcon sx={{ color: darkMode ? "rgba(255, 255, 255, 0.7)" : colors.grey[500] }} />
+                  </InputAdornment>
+                ),
+              }}
+            />
+
+            <Typography variant="body2" sx={{ mb: 1, color: darkMode ? "white" : colors.grey[900] }}>
+              E-posta
+            </Typography>
+            <TextField
+              {...commonTextFieldProps}
+              name="email"
+              type="email"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="ornek@sirket.com"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <EmailIcon sx={{ color: darkMode ? "rgba(255, 255, 255, 0.7)" : colors.grey[500] }} />
+                  </InputAdornment>
+                ),
+              }}
+            />
+          </motion.div>
+        );
+      case 2:
+        return (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <Typography variant="body2" sx={{ mb: 1, color: darkMode ? "white" : colors.grey[900] }}>
+              Şifre
+            </Typography>
+            <TextField
+              {...commonTextFieldProps}
+              name="password"
+              type={showPassword ? "text" : "password"}
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="********"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <LockIcon sx={{ color: darkMode ? "rgba(255, 255, 255, 0.7)" : colors.grey[500] }} />
+                  </InputAdornment>
+                ),
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
+                      {showPassword ? (
+                        <VisibilityOffIcon sx={{ color: darkMode ? "rgba(255, 255, 255, 0.7)" : colors.grey[500] }} />
+                      ) : (
+                        <VisibilityIcon sx={{ color: darkMode ? "rgba(255, 255, 255, 0.7)" : colors.grey[500] }} />
+                      )}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+
+            <Typography variant="body2" sx={{ mb: 1, color: darkMode ? "white" : colors.grey[900] }}>
+              Şifre Tekrar
+            </Typography>
+            <TextField
+              {...commonTextFieldProps}
+              name="password_confirmation"
+              type={showPasswordConfirm ? "text" : "password"}
+              value={formData.password_confirmation}
+              onChange={handleChange}
+              placeholder="********"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <LockIcon sx={{ color: darkMode ? "rgba(255, 255, 255, 0.7)" : colors.grey[500] }} />
+                  </InputAdornment>
+                ),
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton onClick={() => setShowPasswordConfirm(!showPasswordConfirm)} edge="end">
+                      {showPasswordConfirm ? (
+                        <VisibilityOffIcon sx={{ color: darkMode ? "rgba(255, 255, 255, 0.7)" : colors.grey[500] }} />
+                      ) : (
+                        <VisibilityIcon sx={{ color: darkMode ? "rgba(255, 255, 255, 0.7)" : colors.grey[500] }} />
+                      )}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+          </motion.div>
+        );
+      default:
+        return null;
+    }
   };
 
   return (
-    <Box sx={{ width: "100%" }}>
-      <TopBarOfMarketing />
+    <Box sx={{ 
+      width: "100%",
+      background: darkMode ? colors.primary[500] : 'white',
+      color: darkMode ? 'white' : colors.grey[100],
+    }}>
+      <TopBarOfMarketing darkMode={darkMode} setDarkMode={setDarkMode} />
       <Box
         sx={{
+          minHeight: "100vh",
+          background: darkMode 
+            ? `linear-gradient(135deg, ${colors.primary[600]}, ${colors.greenAccent[700]})`
+            : `linear-gradient(135deg, ${colors.primary[400]}, ${colors.greenAccent[500]})`,
           display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "calc(100vh - 64px)",
+          flexDirection: "column",
+          mt: "64px",
         }}
       >
-        <Box
-          sx={{
-            width: "50%",
-            height: "80%",
-            backgroundColor: colors.primary[600],
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            borderRadius: 80,
-            boxShadow:70
-          }}
-        >
-          <Formik
-            initialValues={initialValues}
-            validationSchema={validationSchema}
-            onSubmit={handleSubmit}
+        <Container maxWidth="sm" sx={{ py: 8, flex: 1 }}>
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
           >
-            {({
-              isSubmitting,
-              handleChange,
-              handleBlur,
-              values,
-              errors,
-              touched,
-            }) => (
-              <Form style={{ width: "60%" }}>
-                <Box
+            <Paper
+              elevation={3}
+          sx={{
+                p: 4,
+                borderRadius: "24px",
+                background: darkMode ? colors.primary[400] : "rgba(255, 255, 255, 0.95)",
+                backdropFilter: "blur(10px)",
+                boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
+                border: "1px solid rgba(255, 255, 255, 0.1)",
+                color: darkMode ? 'white' : colors.grey[100],
+              }}
+            >
+              <Typography
+                variant="h3"
                   sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    width: "100%",
-                  }}
-                >
-                  <Box
+                  textAlign: "center",
+                  mb: 4,
+                  fontFamily: "'Poppins', sans-serif",
+                  fontWeight: 600,
+                  background: `linear-gradient(135deg, ${colors.greenAccent[500]}, ${colors.blueAccent[400]})`,
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                }}
+              >
+                Kurumsal Kayıt
+              </Typography>
+
+              <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
+                {steps.map((label) => (
+                  <Step key={label}>
+                    <StepLabel 
+                      sx={{
+                        "& .MuiStepLabel-label": {
+                          color: darkMode ? "white" : colors.grey[900],
+                        },
+                        "& .MuiStepLabel-label.Mui-active": {
+                          color: darkMode ? colors.greenAccent[500] : colors.greenAccent[600],
+                          fontWeight: 600,
+                        },
+                        "& .MuiStepLabel-label.Mui-completed": {
+                          color: darkMode ? colors.greenAccent[500] : colors.greenAccent[600],
+                        },
+                        "& .MuiStepIcon-root": {
+                          color: darkMode ? "rgba(255, 255, 255, 0.3)" : colors.grey[300],
+                        },
+                        "& .MuiStepIcon-root.Mui-active": {
+                          color: darkMode ? colors.greenAccent[500] : colors.greenAccent[600],
+                        },
+                        "& .MuiStepIcon-root.Mui-completed": {
+                          color: darkMode ? colors.greenAccent[500] : colors.greenAccent[600],
+                        },
+                      }}
+                    >
+                      {label}
+                    </StepLabel>
+                  </Step>
+                ))}
+              </Stepper>
+
+              <form onSubmit={handleSubmit}>
+                {renderStepContent(activeStep)}
+
+                {error && (
+                  <Typography
+                    color="error"
+                    variant="body2"
+                    sx={{ mb: 2, textAlign: "center" }}
+                  >
+                    {error}
+                  </Typography>
+                )}
+
+                <Box sx={{ display: "flex", justifyContent: "space-between", mt: 4 }}>
+                  <Button
+                    disabled={activeStep === 0}
+                    onClick={handleBack}
+                    variant="outlined"
                     sx={{
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      marginBottom: 5,
+                      borderColor: darkMode ? colors.greenAccent[500] : colors.grey[800],
+                      color: darkMode ? colors.greenAccent[500] : colors.grey[800],
+                      "&:hover": {
+                        borderColor: darkMode ? colors.greenAccent[600] : colors.grey[900],
+                        backgroundColor: "transparent",
+                      },
                     }}
                   >
-                    <Typography sx={{ fontFamily: "serif" }} variant="h2">
-                      MEDICAL Survey AI
-                    </Typography>
-                    <Typography
-                      sx={{ fontFamily: "serif", mt: 2 }}
-                      variant="h"
-                    >
-                      Fill Out the Form to Buy
-                    </Typography>
-                  </Box>
-
-                  <TextField
-                    fullWidth
-                    name="name"
-                    label="Name"
-                    variant="filled"
-                    value={values.name}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    error={touched.name && Boolean(errors.name)}
-                    helperText={touched.name && errors.name}
-                  />
-
-                  <TextField
-                    fullWidth
-                    name="email"
-                    label="Email"
-                    variant="filled"
-                    value={values.email}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    error={touched.email && Boolean(errors.email)}
-                    helperText={touched.email && errors.email}
-                  />
-
-                  <TextField
-                    fullWidth
-                    name="phone_number"
-                    label="Phone Number"
-                    variant="filled"
-                    value={values.phone_number}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    error={touched.phone_number && Boolean(errors.phone_number)}
-                    helperText={touched.phone_number && errors.phone_number}
-                  />
-
-                  <TextField
-                    fullWidth
-                    name="address"
-                    label="Address"
-                    variant="filled"
-                    value={values.address}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    error={touched.address && Boolean(errors.address)}
-                    helperText={touched.address && errors.address}
-                  />
-
-                  <TextField
-                    fullWidth
-                    name="plan_type"
-                    label="Plan Type"
-                    variant="filled"
-                    value={values.plan_type}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    error={touched.plan_type && Boolean(errors.plan_type)}
-                    helperText={touched.plan_type && errors.plan_type}
-                  />
-
+                    Geri
+                  </Button>
                   <Button
                     type="submit"
-                    disabled={isSubmitting}
+                    variant="contained"
                     sx={{
-                      backgroundColor: colors.greenAccent[400],
-                      marginTop: 3,
-                      fontWeight: "bold",
-                      fontSize: "0.8rem",
+                      background: `linear-gradient(135deg, ${colors.greenAccent[500]}, ${colors.greenAccent[600]})`,
+                      color: "white",
+                      "&:hover": {
+                        background: `linear-gradient(135deg, ${colors.greenAccent[600]}, ${colors.greenAccent[700]})`,
+                      },
                     }}
                   >
-                    Buy
+                    {activeStep === steps.length - 1 ? "Kaydı Tamamla" : "İleri"}
                   </Button>
-                  <Typography sx={{textAlign:"center"}} mt={2} variant="h5">
-                    Already have an account? {" "}
-                    <span
-                      style={{ cursor: "pointer", textDecoration: "underline" }}
-                      onClick={() => navigate("/corporate-login")}
-                    >
-                      Login
-                    </span>
-                  </Typography>
+                </Box>
+              </form>
+            </Paper>
+          </motion.div>
+        </Container>
+
+        <Footer />
 
                   <Snackbar
                     open={openSnackBar}
                     autoHideDuration={3000}
-                    onClose={handleCloseSnackBar}
+          onClose={() => setOpenSnackBar(false)}
                     anchorOrigin={{
                       vertical: "bottom",
                       horizontal: "right",
                     }}
                   >
                     <Alert
-                      onClose={handleCloseSnackBar}
+            onClose={() => setOpenSnackBar(false)}
                       severity="success"
                       variant="filled"
-                      sx={{ width: "100%", fontSize: "0.8rem" }}
-                    >
-                      <Typography variant="h4" color="white">
-                        Purchase Successful!
+            sx={{
+              width: "100%",
+              borderRadius: "12px",
+              backgroundColor: colors.greenAccent[500],
+            }}
+          >
+            <Typography variant="body1" color="white">
+              Kayıt başarılı! Giriş sayfasına yönlendiriliyorsunuz...
                       </Typography>
                     </Alert>
                   </Snackbar>
-                </Box>
-              </Form>
-            )}
-          </Formik>
-        </Box>
       </Box>
     </Box>
   );

@@ -1,16 +1,15 @@
-import { Box } from '@mui/material'
-import React from 'react'
-import Headeer from '../../components/Headeer'
-import LineChart from '../../components/LineChart'
+import { Box } from "@mui/material";
+import Header from "../../components/Header";
+import LineChart from "../../components/LineChart";
 
-export default function Line() {
+export default function Line({ darkMode, setDarkMode }) {
   return (
-    <Box marginLeft={2} marginRight={2}>
-      <Headeer title="Line Chart"/>
+    <Box m="20px">
+      <Header title="Çizgi Grafiği" subtitle="Hasta Takip Verileri" />
       <Box height="75vh">
-      <LineChart/>
-
+        <LineChart isDashboard={false} />
       </Box>
     </Box>
-  )
+  );
 }
+
