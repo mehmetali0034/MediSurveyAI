@@ -13,7 +13,7 @@ import {
 } from "@mui/material";
 import React, { useState } from "react";
 import { tokens } from "../theme";
-import DoctorService from "../services/doctorService";
+import TenantService from "../services/tenantService";
 
 export default function AddAdminDoctor(props) {
   const { openDialog, setOpenDialog } = props;
@@ -43,14 +43,14 @@ export default function AddAdminDoctor(props) {
     setOpenDialog(false);
     refreshFields();
   };
-  const doctorService = new DoctorService();
+  const tenantService = new TenantService();
   
   const handleCloseSnackBar =()=>{
     setOpenSnackBar(false)
   }
   const handleAddDoctor = () => {
     // localStorage'dan token'ı aldım
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("tokenTenant");
 
     // Eğer token yoksa, bir hata mesajı gösterebiliriz
     if (!token) {
@@ -58,7 +58,7 @@ export default function AddAdminDoctor(props) {
       return;
     }
 
-    doctorService
+    tenantService
       .doctorRegister(
         {
           name: name,
@@ -72,7 +72,7 @@ export default function AddAdminDoctor(props) {
         token
       ) // Token'ı gönderiyoruz
       .then((response) => {
-        setOpenSnackBar(true)
+        setOpenSnackBar(true);debugger;
         console.log("Doctor successfully registered:", response.data);
         setOpenDialog(false);
         refreshFields();

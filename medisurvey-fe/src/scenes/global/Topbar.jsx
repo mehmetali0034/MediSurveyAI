@@ -8,6 +8,8 @@ import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import SearchIcon from "@mui/icons-material/Search";
+import LogoutIcon from '@mui/icons-material/Logout';
+import { useNavigate } from "react-router-dom";
 
 const Topbar = () => {
   const theme = useTheme();
@@ -17,7 +19,16 @@ const Topbar = () => {
   const colorMode = useContext(ColorModeContext);//Bu şekilde colorMode değerimi ColorModeContext.Provider'ın valuusu içerisindeki colorMode ' a eşitledim. colorMode kullanarak ColorModeContext içerisine yazdığın value değerine ulaşabileceğim
 // justifyContent="space-between" asıl özellliği içerisindeki ilk öğe ,ile son öğre arasındaki mesafeyi max yapmaktır.P={2} diyerekte içeriği etrafında bir kenar boşluğu (padding) ekler. p özelliği, tüm kenarlarına aynı kenar boşluğunu uygular.
 //DarkButtona tıklandığı zaman colorMode.toggleColorMode fonksiyonu tetiklenecektir.
-  return (
+  
+const handleLogout = ()=>{
+  localStorage.removeItem("doctorId")
+  localStorage.removeItem("token")
+  navigate("/individual-login")
+
+}
+
+const navigate = useNavigate();
+return (
     <Box display="flex" justifyContent="space-between" p={2}>
       {/* SEARCH BAR */}
       <Box
@@ -48,6 +59,9 @@ const Topbar = () => {
         </IconButton>
         <IconButton>
           <PersonOutlinedIcon />
+        </IconButton>
+        <IconButton onClick={handleLogout}>
+          <LogoutIcon />
         </IconButton>
       </Box>
     </Box>

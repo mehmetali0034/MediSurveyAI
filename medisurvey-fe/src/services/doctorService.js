@@ -1,15 +1,35 @@
 import axios from "axios";
-export default class DoctorService{
-    doctorRegister(doctorData,token){
-        return axios.post("http://localhost:3000/api/auth/tenant/register-doctor",doctorData,
-            {
-                headers: {
-                  Authorization: `Bearer ${token}`, // Bearer token'ı Authorization header'ında gönderiyoruz
-                },
-              }
-        )
+import axiosInstance from "../scenes/utils/axiosInstance";
+export default class DoctorService {
+  doctorLogin(doctorData) {
+    return axios.post(
+      "http://localhost:3000/api/auth/login-doctor",
+      doctorData
+    );
+  }
+  getDoctorInfo = async () => {
+    const doctorId = localStorage.getItem("doctorId"); //LocalStorage'dan doctorId'yi getirdim.
+
+    try {
+      const response = await axiosInstance.get(
+        `http://localhost:3000/api/doctors/${doctorId}` 
+      ); debugger ;
+      return response.data ; 
+    } catch (error) {
+      console.error("Error fetching doctor info:", error.message);
+      alert("Failed to fetch doctor info.");
+      return null; 
     }
-    doctorLogin(doctorData){
-      return axios.post("http://localhost:3000/api/auth/login-doctor",doctorData)
+  };
+
+  registerDoctor = async (data)=>{
+    try{
+      const response = await axiosInstance.post("http://localhost:3000/api/auth/admin/register-doctor",data);
+      return response.data;
+    }catch(error){
+      console.log("Ekleme Sırasında Hata Meydana Geldi.")
+      alert("Failed to fetch doctor info.");
+      return null; 
     }
+  }
 }

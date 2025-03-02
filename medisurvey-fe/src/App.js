@@ -21,7 +21,7 @@ import TenantRegister from "./scenes/register/TenantRegister";
 import CorporateLogin from "./scenes/loginn/CorporateLogin";
 import IndividualLogin from "./scenes/loginn/IndividualLogin";
 import TenDashboard from "./scenes/dashboard/TenDashboard";
-
+import TenantProfile from "./scenes/profile/tenantProfile"
 function App() {
   const [theme, colorMode] = useMode();
   const [isSidebar, setIsSidebar] = useState(true);
@@ -39,6 +39,7 @@ function App() {
             <Route path="/MediSurveyAI" element={<Marketing />} />
             <Route path="/tenantRegister" element={<TenantRegister />} />
             <Route path="/tenant/dashboard" element={<TenDashboard />} />
+            <Route path="/tenant/profile" element={<TenantProfile/>}/>
             <Route
               path="/*"
               element={

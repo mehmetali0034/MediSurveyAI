@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Headeer from "../../components/Headeer";
 import { Box, Button, IconButton, Typography } from "@mui/material";
 import DownloadIcon from "@mui/icons-material/Download";
@@ -14,10 +14,28 @@ import { mockTransactions } from "../../data/mockData";
 import BarChart from "../../components/BarChart";
 import GeoChart from "../../components/GeoChart";
 import ProgressCircle from "../../components/ProgressCircle";
+import DoctorService from "../../services/doctorService";
 
 export default function Dashboard() {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+  const [doctorInfo, setDoctorInfo] = useState(null);
+  const doctorService = new DoctorService();
+
+    // Component yüklendiğinde doktor bilgilerini çek
+    useEffect(() => {
+      const fetchDoctorInfo = async () => {
+        try {
+          const info = await doctorService.getDoctorInfo()
+          setDoctorInfo(info);
+          console.log(info)
+        } catch (error) {
+          console.error("Error fetching doctor info:", error);
+        }
+      };
+      fetchDoctorInfo();
+    }, []);
+  
   return (
     <Box marginLeft={2} marginRight={2}>
       <Box display="flex" justifyContent="space-between">

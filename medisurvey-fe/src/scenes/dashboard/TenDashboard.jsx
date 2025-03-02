@@ -1,21 +1,35 @@
 import { Box, Grid, Typography } from "@mui/material";
-import React from "react";
-import TopbarOfTenant from "../topbar/TopbarOfTenant";
+import React, { useEffect, useState } from "react";
+
 import { useTheme } from "@emotion/react";
 import { tokens } from "../../theme";
 import CountUp from "react-countup"; // Kütüphane eklendi
+import TenantService from "../../services/tenantService";
+import TopbarOfTenant from "../tenant-global/TopbarTenant";
+
 
 export default function TenDashboard() {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+  const [doctors, setDoctors] = useState([]);debugger;
+  const token = localStorage.getItem("tokenTenant"); // Token anahtarını buraya yaz
+  
+  const tenantService = new TenantService();
+  useEffect(() => {
+    tenantService.getAllDoctor(token)
+      .then((data) => {
+        setDoctors(data); // API'den gelen veriyi state'e kaydet
+      })
+      .catch((error) => {
+        console.error("Doktorları çekerken hata oluştu:", error);
+      });
+  }, [token]); // Token değişirse tekrar çalışır
 
   return (
     <Box sx={{ width: "100%" }}>
-      <TopbarOfTenant />
+      <TopbarOfTenant/>
       <Box sx={{ marginTop: "4%" }}>
-        <Typography>
-          
-        </Typography>
+        <Typography></Typography>
         <Box sx={{ height: "35vh", m: 5 }}>
           <Grid container spacing={5}>
             <Grid item xs={12} sm={6} md={3}>
@@ -35,7 +49,7 @@ export default function TenDashboard() {
                   Total Number of Doctor
                 </Typography>
                 <Typography variant="h2">
-                  <CountUp start={0} end={100} duration={2.5} />
+                  <CountUp start={0} end={doctors.length} duration={2.5} />
                 </Typography>
               </Box>
             </Grid>

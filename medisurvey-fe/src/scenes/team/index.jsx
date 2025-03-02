@@ -68,7 +68,7 @@ export default function Team() {
   ];
 
   const clickToAddDoktor = () => {
-    navigate("/form");
+    navigate("/addDoctor");
   };
   return (
     <Box marginLeft={2} marginRight={2}>

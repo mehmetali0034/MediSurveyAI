@@ -28,6 +28,8 @@ export default function TenantRegister() {
     phone_number: "",
     address: "",
     plan_type: "",
+    password: "",
+    password_confirmation:"",
   };
 
   const validationSchema = Yup.object({
@@ -40,6 +42,10 @@ export default function TenantRegister() {
       .required("Phone number is required"),
     address: Yup.string().required("Address is required"),
     plan_type: Yup.string().required("Plan Type is required"),
+    password: Yup.string().required("Password is required"),
+    password_confirmation: Yup.string().required(
+      "Password Confirmation isrequired"
+    ),
   });
 
   const handleSubmit = (values, { setSubmitting, resetForm }) => {
@@ -50,6 +56,8 @@ export default function TenantRegister() {
         phone_number: values.phone_number,
         address: values.address,
         plan_type: values.plan_type,
+        password: values.password,
+        password_confirmation: values.password_confirmation,
       })
       .then((response) => {
         console.log("Tenant successfully registered:", response.data);
@@ -88,7 +96,7 @@ export default function TenantRegister() {
             justifyContent: "center",
             alignItems: "center",
             borderRadius: 80,
-            boxShadow:70
+            boxShadow: 70,
           }}
         >
           <Formik
@@ -123,10 +131,7 @@ export default function TenantRegister() {
                     <Typography sx={{ fontFamily: "serif" }} variant="h2">
                       MEDICAL Survey AI
                     </Typography>
-                    <Typography
-                      sx={{ fontFamily: "serif", mt: 2 }}
-                      variant="h"
-                    >
+                    <Typography sx={{ fontFamily: "serif", mt: 2 }} variant="h">
                       Fill Out the Form to Buy
                     </Typography>
                   </Box>
@@ -190,7 +195,28 @@ export default function TenantRegister() {
                     error={touched.plan_type && Boolean(errors.plan_type)}
                     helperText={touched.plan_type && errors.plan_type}
                   />
-
+                  <TextField
+                    fullWidth
+                    name="password"
+                    label="Password"
+                    variant="filled"
+                    value={values.password}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    error={touched.password && Boolean(errors.password)}
+                    helperText={touched.password && errors.password}
+                  />
+                  <TextField
+                    fullWidth
+                    name="password_confirmation"
+                    label="Password Confirmation"
+                    variant="filled"
+                    value={values.password_confirmation}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    error={touched.password_confirmation && Boolean(errors.password_confirmation)}
+                    helperText={touched.password_confirmation && errors.password_confirmation}
+                  />
                   <Button
                     type="submit"
                     disabled={isSubmitting}
@@ -203,8 +229,8 @@ export default function TenantRegister() {
                   >
                     Buy
                   </Button>
-                  <Typography sx={{textAlign:"center"}} mt={2} variant="h5">
-                    Already have an account? {" "}
+                  <Typography sx={{ textAlign: "center" }} mt={2} variant="h5">
+                    Already have an account?{" "}
                     <span
                       style={{ cursor: "pointer", textDecoration: "underline" }}
                       onClick={() => navigate("/corporate-login")}

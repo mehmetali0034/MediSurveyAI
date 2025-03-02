@@ -5,25 +5,29 @@ import { useTheme } from "@emotion/react";
 import { tokens } from "../../theme";
 import TenantService from "../../services/tenantService";
 import { useNavigate } from "react-router-dom";
+import { jwtDecode } from 'jwt-decode';
 
 export default function CorporateLogin() {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const tenantService = new TenantService();
-  const [emailValue, setEmailValue] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [passwordValue, setPasswordValue] = useState("");
   const navigate = useNavigate();
 
   const clickToLogin = async () => {
     const tenantData = {
-      email: emailValue,
-      phone_number: passwordValue,
+      phone_number: phoneNumber,
+      password: passwordValue,
     };
 
     try {
       const response = await tenantService.tenantLogin(tenantData);
       console.log("Login successful:", response.data);
-      localStorage.setItem("token", response.data.token); // Token'ı localStorage'a kaydettim
+      localStorage.setItem("tokenTenant", response.data.token);
+      debugger;
+      const decodedToken = jwtDecode(response.data.token);
+      localStorage.setItem("tenantId", decodedToken.id);
       navigate("/tenant/dashboard");
     } catch (error) {
       console.error(
@@ -65,8 +69,8 @@ export default function CorporateLogin() {
           </Typography>
 
           <TextField
-            value={emailValue}
-            onChange={(e) => setEmailValue(e.target.value)}
+            value={phoneNumber}
+            onChange={(e) => setPhoneNumber(e.target.value)}
             sx={{
               backgroundColor: colors.grey[200],
               width: "50%",
@@ -74,7 +78,7 @@ export default function CorporateLogin() {
               margin: 2,
             }}
             id="filled-basic"
-            label="Email"
+            label="Phone Number"
             variant="filled"
             InputProps={{
               sx: {

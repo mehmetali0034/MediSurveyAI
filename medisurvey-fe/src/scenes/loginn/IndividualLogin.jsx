@@ -1,14 +1,41 @@
 import { Box, Button, TextField, Typography } from "@mui/material";
-import React from "react";
+import React, { useState } from "react";
 import TopBarOfMarketing from "../../components/TopBarOfMarketing";
 import { useTheme } from "@emotion/react";
 import { tokens } from "../../theme";
 import { useNavigate } from "react-router-dom";
+import DoctorService from "../../services/doctorService";
+import { jwtDecode } from 'jwt-decode';
 
 export default function IndividualLogin() {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const navigate = useNavigate();
+  const [emailValue, setEmailValue] = useState("")
+  const [passwordValue, setPasswordValue] = useState("")
+
+  const doctorService = new DoctorService();
+
+  const clickToLogin =async()=>{
+    const doctorData ={
+      email:emailValue,
+      password: passwordValue 
+    }
+    try{
+      const response = await doctorService.doctorLogin(doctorData);
+      console.log("Login successful",response.data); debugger;
+      localStorage.setItem("token",response.data.token) ;debugger;
+      const decodedToken = jwtDecode(response.data.token)
+      localStorage.setItem("doctorId",decodedToken.id);
+      navigate("/dashboard")
+    }catch(error){
+      console.error(
+        "Login failed:",
+        error.response ? error.response.data : error.message
+      );
+      alert("Login failed. Please check your credentials.");
+    }
+  }
   return (
     <Box sx={{ width: "100%" }}>
       <TopBarOfMarketing />
@@ -67,6 +94,8 @@ export default function IndividualLogin() {
               id="filled-basic"
               label="Email"
               variant="filled"
+              value={emailValue}
+              onChange={(e)=>{setEmailValue(e.target.value)}}
               sx={{
                 width: "70%",
                 backgroundColor: "white",
@@ -88,7 +117,10 @@ export default function IndividualLogin() {
             <TextField
               id="filled-basic"
               label="Password"
+              type="password"
               variant="filled"
+              value={passwordValue}
+              onChange={(e)=>{setPasswordValue(e.target.value)}}
               sx={{
                 width: "70%",
                 backgroundColor: "white",
@@ -116,7 +148,7 @@ export default function IndividualLogin() {
                 fontSize: "0.8rem",
                 borderRadius: 10,
               }}
-              onClick={()=>navigate("/dashboard")}
+              onClick={clickToLogin}
             >
               Login
             </Button>

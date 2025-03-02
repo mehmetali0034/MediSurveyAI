@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  backend:
+    image: mehmetali0034/medisurvey-backend
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./medisurvey-be/.env
+    depends_on:
+      - db
+
+  frontend:
+    image: mehmetali0034/medisurvey-frontend
+    ports:
+      - "3010:3010"
+
+  db:
+    image: postgres:15
+    container_name: postgres_db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: medisurvey
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+volumes:
+  db_data:

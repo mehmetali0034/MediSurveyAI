@@ -1,7 +1,7 @@
 const { DataTypes } = require('sequelize');
 const db = require('../config/database');
 const { v4: uuidv4 } = require('uuid');
-const bcrypt = require('bcrypt');  // bcrypt'i dahil et
+
 
 const Tenant = db.define('Tenant', {
   id: {

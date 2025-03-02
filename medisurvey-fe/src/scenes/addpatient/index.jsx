@@ -6,8 +6,11 @@ import {
   MenuItem,
   Select,
   Button,
+  Snackbar,
+  Alert,
+  Typography,
 } from "@mui/material";
-import React from "react";
+import React, { useState } from "react";
 import * as Yup from "yup";
 import { Formik } from "formik";
 import { useTheme } from "@emotion/react";
@@ -16,11 +19,17 @@ import useMediaQuery from "@mui/material/useMediaQuery";
 import PhoneInput from "react-phone-number-input";
 import "react-phone-number-input/style.css";
 import Headeer from "../../components/Headeer";
+import PatientService from "../../services/patientService";
 
 export default function AddPatient() {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const isNonMobile = useMediaQuery("(min-width:600px)");
+  const [openSnackBar, setOpenSnackBar] = useState(false);
+
+  const handleCloseSnackBar = () => {
+    setOpenSnackBar(false);
+  };
 
   const initialValues = {
     firstName: "",
@@ -43,17 +52,58 @@ export default function AddPatient() {
       .nullable(),
     phoneOne: Yup.string()
       .required("This field is required")
-      .matches(/^\+?[1-9]\d{1,14}$/, "Geçerli bir telefon numarası giriniz."),
+      .matches(/^\+?[1-9]\d{1,14}$/, "Please enter a valid phone number."),
     phoneTwo: Yup.string()
       .required("This field is required")
-      .matches(/^\+?[1-9]\d{1,14}$/, "Geçerli bir telefon numarası giriniz."),
+      .matches(/^\+?[1-9]\d{1,14}$/, "Please enter a valid phone number."),
     file: Yup.string().required("This field is required"),
-    email: Yup.string().required("This field is required"),
+    email: Yup.string()
+      .required("This field is required")
+      .email("Invalid email format"),
   });
 
-  const handleSubmit = (values, { resetForm }) => {
-    console.log("Veriler: ", values);
-    resetForm();
+  const patientService = new PatientService();
+
+  const clickToAddPatient = (values, { resetForm, setSubmitting }) => {
+    const patientData = {
+      firstName: values.firstName,
+      lastName: values.lastName,
+      email: values.email,
+      gender: values.gender,
+      primaryPhone: values.phoneOne,
+      secondaryPhone: values.phoneTwo,
+      file: values.file,
+      dateOfBirth: values.dateOfBirth,
+    };
+
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      alert("Authentication token not found. Please log in again.");
+      return;
+    }
+
+    patientService
+      .addPatient(patientData, token)
+      .then((response) => {
+        setOpenSnackBar(true);
+        console.log("Patient successfully registered:", response.data);
+        resetForm(); // formu sıfırlıyoruz
+      })
+      .catch((error) => {
+        console.error(
+          "Error registering patient:",
+          error.response?.data || error.message
+        );
+        alert(
+          `Error: ${
+            error.response?.data?.message || "Failed to register patient"
+          }`
+        );
+      })
+      .finally(() => {
+        setSubmitting(false); // submitting durumunu false yapıyoruz
+      });
   };
 
   return (
@@ -62,7 +112,9 @@ export default function AddPatient() {
       <Formik
         initialValues={initialValues}
         validationSchema={SignupSchema}
-        onSubmit={handleSubmit}
+        onSubmit={(values, { resetForm, setSubmitting }) => {
+          clickToAddPatient(values, { resetForm, setSubmitting });
+        }}
       >
         {({
           values,
@@ -119,8 +171,6 @@ export default function AddPatient() {
                 helperText={touched.email && errors.email}
                 sx={{ gridColumn: "span 2" }}
               />
-
-              {/* Date of Birth */}
               <TextField
                 fullWidth
                 type="date"
@@ -136,7 +186,6 @@ export default function AddPatient() {
                   shrink: true,
                 }}
               />
-
               <FormControl
                 fullWidth
                 variant="filled"
@@ -150,8 +199,9 @@ export default function AddPatient() {
                   onChange={handleChange}
                   error={Boolean(touched.gender && errors.gender)}
                 >
-                  <MenuItem value="male">Male</MenuItem>
-                  <MenuItem value="female">Female</MenuItem>
+                  <MenuItem value="Male">Male</MenuItem>
+                  <MenuItem value="Female">Female</MenuItem>
+                  <MenuItem value="Other">Other</MenuItem>
                 </Select>
                 {touched.gender && errors.gender && (
                   <Box sx={{ color: colors.redAccent[500] }}>
@@ -173,7 +223,9 @@ export default function AddPatient() {
                   onChange={handleChange}
                   error={Boolean(touched.file && errors.file)}
                 >
-                  <MenuItem value="Tendon Yırtılması">Tendon Yırtılması</MenuItem>
+                  <MenuItem value="Tendon Yırtılması">
+                    Tendon Yırtılması
+                  </MenuItem>
                   <MenuItem value="Ön Çarpraz Bağ">Ön Çarpraz Bağ</MenuItem>
                 </Select>
                 {touched.file && errors.file && (
@@ -181,14 +233,13 @@ export default function AddPatient() {
                 )}
               </FormControl>
 
-              {/* Phone One */}
               <Box sx={{ gridColumn: "span 1" }}>
                 <PhoneInput
                   international
                   defaultCountry="TR"
                   value={values.phoneOne}
                   onChange={(value) => setFieldValue("phoneOne", value)}
-                  error={touched.phoneOne && errors.phoneOne ? true : undefined} // Burada `false` yerine `undefined` kullanıyoruz
+                  error={touched.phoneOne && errors.phoneOne ? true : undefined}
                   placeholder="Enter phone number"
                   style={{
                     width: "100%",
@@ -202,19 +253,20 @@ export default function AddPatient() {
                     backgroundColor: colors.primary[400],
                   }}
                 />
-
                 {touched.phoneOne && errors.phoneOne && (
-                  <Box sx={{ color: colors.redAccent[500] }}>{errors.file}</Box>
+                  <Box sx={{ color: colors.redAccent[500] }}>
+                    {errors.phoneOne}
+                  </Box>
                 )}
               </Box>
-              {/* Phone Two */}
+
               <Box sx={{ gridColumn: "span 1" }}>
                 <PhoneInput
                   international
                   defaultCountry="TR"
                   value={values.phoneTwo}
                   onChange={(value) => setFieldValue("phoneTwo", value)}
-                  error={touched.phoneTwo && errors.phoneTwo ? true : undefined} // Burada `false` yerine `undefined` kullanıyoruz
+                  error={touched.phoneTwo && errors.phoneTwo ? true : undefined}
                   placeholder="Enter phone number"
                   style={{
                     width: "100%",
@@ -228,12 +280,14 @@ export default function AddPatient() {
                     backgroundColor: colors.primary[400],
                   }}
                 />
-
                 {touched.phoneTwo && errors.phoneTwo && (
-                  <Box sx={{ color: colors.redAccent[500] }}>{errors.file}</Box>
+                  <Box sx={{ color: colors.redAccent[500] }}>
+                    {errors.phoneTwo}
+                  </Box>
                 )}
               </Box>
             </Box>
+
             <Box marginTop={4} display="flex" justifyContent="end">
               <Button
                 type="submit"
@@ -243,6 +297,26 @@ export default function AddPatient() {
               >
                 ADD NEW PATIENT
               </Button>
+              <Snackbar
+                open={openSnackBar}
+                autoHideDuration={3000}
+                onClose={handleCloseSnackBar}
+                anchorOrigin={{
+                  vertical: "bottom",
+                  horizontal: "right",
+                }}
+              >
+                <Alert
+                  onClose={handleCloseSnackBar}
+                  severity="success"
+                  variant="filled"
+                  sx={{ width: "100%", fontSize: "0.8rem" }}
+                >
+                  <Typography variant="h4" color="white">
+                    Patient Added Successfully!
+                  </Typography>
+                </Alert>
+              </Snackbar>
             </Box>
           </form>
         )}
