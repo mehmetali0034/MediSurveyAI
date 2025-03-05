@@ -2,7 +2,6 @@ const { DataTypes } = require('sequelize');
 const db = require('../config/database');
 const { v4: uuidv4 } = require('uuid');
 
-
 const Tenant = db.define('Tenant', {
   id: {
     type: DataTypes.UUID,
@@ -39,7 +38,7 @@ const Tenant = db.define('Tenant', {
     defaultValue: true,
   },
 }, {
-  tableName: 'tenants',
+  tableName: 'Tenants',
 });
 
 module.exports = Tenant;

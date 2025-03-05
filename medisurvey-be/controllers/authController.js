@@ -8,6 +8,7 @@ const adminRegisterDoctor = async (req, res) => {
     const decoded = jwt.verify(token, 'secretkey');
     const tenant_id = decoded.id;
 
+
     const { name, surname, email, password, confirm_password, specialization, phone_number } = req.body;
 
     if (password !== confirm_password) {
@@ -52,6 +53,7 @@ const registerDoctor = async (req, res) => {
   try {
     const token = req.headers['authorization']?.split(' ')[1];
     const decoded = jwt.verify(token, 'secretkey');
+    const admin_id = decoded.id;
     const tenant_id = decoded.tenant_id;
 
     const { name, surname, email, password, confirm_password, specialization, phone_number } = req.body;
@@ -76,12 +78,13 @@ const registerDoctor = async (req, res) => {
       specialization,
       phone_number,
       tenant_id: tenant_id,
+      created_by: admin_id
     });
 
     const newToken = jwt.sign(
       {
         id: newDoctor.id,
-        tenant_id: newDoctor.tenant_id,
+        tenant_id: tenant_id,
         role: newDoctor.role,
       },
       'secretkey',
@@ -90,6 +93,7 @@ const registerDoctor = async (req, res) => {
 
     res.status(201).json({ doctor: newDoctor, token: newToken });
   } catch (error) {
+    console.error('Hata:', error);
     res.status(500).json({ error: 'Doktor kaydı sırasında bir hata oluştu.', details: error.message });
   }
 };
@@ -122,9 +126,9 @@ const registerTenant = async (req, res) => {
 
 const loginTenant = async (req, res) => {
   try {
-    const { phone_number, password } = req.body;
+    const { email, password } = req.body;
 
-    const tenant = await Tenant.findOne({ where: { phone_number } });
+    const tenant = await Tenant.findOne({ where: { email } });
 
     if (!tenant) {
       return res.status(404).json({ error: 'Kurum bulunamadı.' });
