@@ -39,7 +39,7 @@ const Tenant = db.define('Tenant', {
     defaultValue: true,
   },
 }, {
-  tableName: 'tenants',
+  tableName: 'Tenants',
 });
 
 module.exports = Tenant;

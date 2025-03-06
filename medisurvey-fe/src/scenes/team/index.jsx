@@ -49,6 +49,12 @@ export default function Team() {
       cellClassName: "name-column--cell",
       flex: 1,
     }, //name'lere özel sınıf tanımladım bu sayede onu özelleştirebileceğim.
+    {
+      field: "surname",
+      headerName: "Surname",
+      cellClassName: "name-column--cell",
+      flex: 1,
+    }, //name'lere özel sınıf tanımladım bu sayede onu özelleştirebileceğim.
 
     {
       field: "age",

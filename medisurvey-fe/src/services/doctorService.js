@@ -32,4 +32,13 @@ export default class DoctorService {
       return null; 
     }
   }
+
+  getAllDoctor = async ()=>{
+    try{
+      const response = await axiosInstance.get(`http://localhost:3000/api/doctors`)
+      return response.data
+    }catch(error){
+      console.log("Bir sorun oluştu.")
+    }
+  }
 }
