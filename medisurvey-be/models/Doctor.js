@@ -47,6 +47,14 @@ const Doctor = db.define('Doctor', {
     },
     allowNull: false,
   },
+  created_by: {
+    type: DataTypes.UUID,
+    allowNull: true,
+    references: {
+      model: 'Doctors',
+      key: 'id'
+    }
+  }
 }, {});
 
 
