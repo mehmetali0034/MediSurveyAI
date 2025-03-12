@@ -35,7 +35,15 @@ export default class DoctorService {
 
   getAllDoctor = async ()=>{
     try{
-      const response = await axiosInstance.get(`http://localhost:3000/api/doctors`)
+      const response = await axiosInstance.get(`http://localhost:3000/api/doctors/all`)
+      return response.data
+    }catch(error){
+      console.log("Bir sorun oluştu.")
+    }
+  }
+  addDoctor = async (data)=>{
+    try{
+      const response = await axiosInstance.post("http://localhost:3000/api/auth/admin/register-doctor",data)
       return response.data
     }catch(error){
       console.log("Bir sorun oluştu.")

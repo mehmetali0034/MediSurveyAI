@@ -22,6 +22,9 @@ import CorporateLogin from "./scenes/loginn/CorporateLogin";
 import IndividualLogin from "./scenes/loginn/IndividualLogin";
 import TenDashboard from "./scenes/dashboard/TenDashboard";
 import TenantProfile from "./scenes/profile/tenantProfile"
+import CreateNewFile from "./scenes/createFile"
+import TenantDoctors from "./scenes/tenant-doctors"
+
 function App() {
   const [theme, colorMode] = useMode();
   const [isSidebar, setIsSidebar] = useState(true);
@@ -40,6 +43,7 @@ function App() {
             <Route path="/tenantRegister" element={<TenantRegister />} />
             <Route path="/tenant/dashboard" element={<TenDashboard />} />
             <Route path="/tenant/profile" element={<TenantProfile/>}/>
+            <Route path="/tenant/doctors" element={<TenantDoctors/>}/>
             <Route
               path="/*"
               element={
@@ -61,6 +65,7 @@ function App() {
                       <Route path="/line" element={<Li̇ne />} />
                       <Route path="/pie" element={<Pie />} />
                       <Route path="/AddPatient" element={<AddPatient />} />
+                      <Route path="/Create-NewFile" element={<CreateNewFile/>} />
                     </Routes>
                   </main>
                 </>

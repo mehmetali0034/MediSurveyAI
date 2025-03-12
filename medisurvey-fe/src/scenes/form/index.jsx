@@ -13,16 +13,20 @@ import { Formik } from "formik";
 import { useTheme } from "@emotion/react";
 import { tokens } from "../../theme";
 import useMediaQuery from "@mui/material/useMediaQuery";
+import DoctorService from "../../services/doctorService";
 export default function Form() {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+  const doctorService = new DoctorService();
+  const token=localStorage.getItem("token")
   const initialValues = {
     firstName: "",
     lastName: "",
     email: "",
     contact: "",
     speciality: "",
-    role: "",
+    password:"",
+    confirm_password:""
   };
   const SignupSchema = Yup.object().shape({
     firstName: Yup.string().required("This Field is Required."),
@@ -32,17 +36,12 @@ export default function Form() {
       .matches(/^\+?[1-9]\d{1,14}$/, "Phone Number is not Valid.")
       .required("This field is Required."),
     speciality: Yup.string().required("This Field is Required."),
-    role: Yup.string().required("Role is required"),
-    files: Yup.string().required("Role is required"),
+  
   });
   const isNonMobile = useMediaQuery("(min-width:600px)");
   const [openSnack, setOpenSnack] = useState(false);
 
-  const handleSubmit = (values, { resetForm }) => {
-    console.log("Veriler:", values);
-    setOpenSnack(true);
-    resetForm();
-  };
+  
   const handleClose = () => {
     setOpenSnack(false);
   };
@@ -54,16 +53,41 @@ const value = "someValue";
 const booleanValue = !!value; // true (eğer value boş değilse)
 */
 
-  const roles = ["Admin", "User"];
+  
   const files = ["Ön Çarpraz Bağ", "Tendon"];
+  const handleCreateDoctor = async (values, { resetForm, setSubmitting }) => {
+    const doctorData = {
+      name: values.firstName,
+      surname: values.lastName,
+      email: values.email,
+      phone_number: values.contact,
+      specialization: values.speciality,
+      password: values.password,
+      confirm_password: values.confirm_password,
+    };
+  
+    try {
+      await doctorService.addDoctor(doctorData,token);debugger
+      setOpenSnack(true);
+      resetForm();
+    } catch (error) {
+      console.error("Doktor kaydı sırasında hata oluştu:", error);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+    
+  
 
   return (
     <Box marginLeft={2} marginRight={2}>
       <Headeer title="ADD DOCTOR" subtitle="Add a New Doctor Profile" />
       <Formik
-        onSubmit={handleSubmit}
         initialValues={initialValues}
         validationSchema={SignupSchema}
+        onSubmit={(values, { resetForm, setSubmitting }) => {
+          handleCreateDoctor(values, { resetForm, setSubmitting });
+        }}
       >
         {({
           values, // Formdaki her alanın mevcut değerini içeren bir nesnedir.
@@ -146,22 +170,31 @@ const booleanValue = !!value; // true (eğer value boş değilse)
                 onChange={handleChange}
                 sx={{ gridColumn: "span 2" }}
               />
-              <Autocomplete
-                options={roles}
-                onChange={(event, newValue) => setFieldValue("role", newValue)}
-                value={values.role || ""} // Eğer role değeri undefined veya null ise boş string olarak ayarlanır
-                sx={{ gridColumn: "span 1" }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    label="Role"
-                    variant="outlined"
-                    error={Boolean(touched.role && errors.role)}
-                    helperText={touched.role && errors.role}
-                  />
-                )}
+              <TextField
+                type="password"
+                name="password"
+                label="Password "
+                variant="filled"
+                value={values.password}
+                error={Boolean(touched.password && errors.password)}
+                helperText={touched.password && errors.password}
+                onBlur={handleBlur}
+                onChange={handleChange}
+                sx={{ gridColumn: "span 2" }}
               />
-
+               <TextField
+                type="password"
+                name="confirm_password"
+                label="Confirm Password "
+                variant="filled"
+                value={values.confirm_password}
+                error={Boolean(touched.confirm_password && errors.confirm_password)}
+                helperText={touched.confirm_password && errors.confirm_password}
+                onBlur={handleBlur}
+                onChange={handleChange}
+                sx={{ gridColumn: "span 2" }}
+              />
+            
               <Autocomplete
                 options={files}
                 onChange={(event, newValue) => setFieldValue("files", newValue)}

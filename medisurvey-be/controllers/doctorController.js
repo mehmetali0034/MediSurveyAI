@@ -2,7 +2,7 @@ const { Doctor, Tenant } = require('../models');
 const jwt = require('jsonwebtoken');
 const db = require('../models');
 const { Op } = require('sequelize');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 
 const getAllDoctorsByTenant = async (req, res) => {
   try {

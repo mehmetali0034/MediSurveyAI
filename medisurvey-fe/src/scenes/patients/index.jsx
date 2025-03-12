@@ -1,67 +1,99 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Box } from '@mui/material'
 import { DataGrid ,GridToolbar  } from '@mui/x-data-grid';
-import {mockDataContacts} from "../../data/mockData"
 import Headeer from '../../components/Headeer';
 import { tokens } from '../../theme';
 import { useTheme } from '@emotion/react';
 import Buttonn from '../../components/Buttonn';
 import AddCircleIcon from "@mui/icons-material/AddCircle";
+import { useNavigate } from 'react-router-dom';
+import PatientService from '../../services/patientService';
 
 export default function Patients() {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-  console.log("Musa")
-  console.log(colors.blueAccent[400])
-
+  const patientService = new PatientService();
+  const navigate = useNavigate()
+  const [patients, setPatients] = useState([])
+  const clickToAddPatients =()=>{
+    navigate("/AddPatient")
+  }
+  
+  useEffect(() => {
+    const fetchAllPatients = async () => {
+      try {
+        const response = await patientService.getAllPatients();
+        const formattedPatients = response.patients.map(patient => ({
+          ...patient,
+          doctorName: patient.Doctor ? `${patient.Doctor.name} ${patient.Doctor.surname}` : "N/A"
+        }));
+        setPatients(formattedPatients);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    fetchAllPatients();
+  }, []);
+  
   const columns = [
-    { field: 'id', headerName: 'ID' },
     {
-      field: 'registrarId',
-      headerName: 'Registrar Id',
-      flex:1
-    },
-    {
-      field: 'name',
+      field: 'firstName',
       headerName: 'Name',
       cellClassName: "name-column--cell",
       flex:1
      
     },
     {
+      field: 'lastName',
+      headerName: 'Last Name',
+      cellClassName: "name-column--cell",
+      flex:1
+     
+    },
+    /* {
       field: 'age',
       headerName: 'Age',
       type: 'number',
       headerAlign: 'left', // Sütun başlığının sola hizalanması
       align: 'left', 
-    },
+    }, */
     {
       field: 'email',
       headerName: 'Email',
       flex:1
-      
-      
     },
   
     {
-      field: 'phone',
-      headerName: 'Phone',
+      field: 'primaryPhone',
+      headerName: 'Primary Phone',
       description: 'This column was created for users phone number',
       flex:1
     },
     {
-      field: 'address',
-      headerName: 'Address',
+      field: 'secondaryPhone',
+      headerName: 'Secondary Phone',
+      description: 'This column was created for users phone number',
       flex:1
     },
     {
-      field: 'city',
-      headerName: 'City',
+      field: 'file',
+      headerName: 'File',
+      description: 'This column was created for users phone number',
       flex:1
-        },
+    },
     {
-      field: 'zipCode',
-      headerName: 'Zip Code',
+      field: 'dateOfBirth',
+      headerName: 'Date Of Birth',
+      flex:1
+      },
+    {
+      field: 'gender',
+      headerName: 'Gender',
+      flex:1
+    },
+    {
+      field: 'doctorName',
+      headerName: 'Doctor',
       flex:1
     },
   ];
@@ -69,7 +101,7 @@ export default function Patients() {
     <Box sx={{ marginLeft:2 , marginRight:2 }} >
       <Box sx={{display:"flex", justifyContent:"space-between",alignItems: "center"}}>
       <Headeer title="PATIENTS" subtitle="List of Contacts for Future Reference"/>
-      <Buttonn >
+      <Buttonn onClick={clickToAddPatients}>
           Add Patients
           <AddCircleIcon sx={{ marginLeft: "8px" }} />
         </Buttonn>
@@ -106,7 +138,7 @@ export default function Patients() {
         },
 
       }}>
-        <DataGrid checkboxSelection rows={mockDataContacts}
+        <DataGrid checkboxSelection rows={patients}
         columns={columns} components={{ Toolbar: GridToolbar }} />
       </Box>
     </Box>

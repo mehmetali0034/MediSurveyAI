@@ -1,41 +1,29 @@
+import { Box, filledInputClasses, Typography } from "@mui/material";
 import React, { useEffect, useState } from "react";
-import { DataGrid } from "@mui/x-data-grid";
+import TopbarOfTenant from "../tenant-global/TopbarTenant";
+import { useTheme } from "@emotion/react";
 import { tokens } from "../../theme";
+import { DataGrid } from "@mui/x-data-grid";
+import TenantService from "../../services/tenantService";
 import AdminPanelSettingsOutlinedIcon from "@mui/icons-material/AdminPanelSettingsOutlined";
 import LockOpenOutlinedIcon from "@mui/icons-material/LockOpenOutlined";
 import SecurityOutlinedIcon from "@mui/icons-material/SecurityOutlined";
-import { Box, Button, Typography, useTheme } from "@mui/material";
-import Headeer from "../../components/Headeer";
-import Buttonn from "../../components/Buttonn";
-import { useNavigate } from "react-router-dom";
-import AddCircleIcon from "@mui/icons-material/AddCircle";
-import DoctorService from "../../services/doctorService";
 
-export default function Team() {
+export default function TenantDoctors() {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-  const doctorService = new DoctorService();
+  const tenantService = new TenantService();
+  const token = localStorage.getItem("tokenTenant")
+  const [adminDoctors, setAdminDoctors] = useState([])
+  const [userDoctors, setUserDoctors] = useState([])
   const [selectedItems, setSelectedItems] = useState([]);
-  const navigate = useNavigate();
-  const [doctors, setDoctors] = useState([])
-
-  useEffect(() => {
-    const fetchAllDoctor = async () => {
-      try {
-        const response = await doctorService.getAllDoctor()
-        setDoctors(response);
-        console.log("Doktorlarım:",response)
-      } catch (error) {
-        console.error("Error fetching doctor info:", error);
-      }
-    };
-    fetchAllDoctor();
-  }, []);
+  const allDoctors =[...adminDoctors,...userDoctors]
 
   const handleSelectionChange = (selectionModel) => {
     setSelectedItems(selectionModel);
     console.log("Selected Items:", selectedItems);
   };
+
   const CustomAccessCell = ({ value }) => (
     <Box
       style={{
@@ -49,7 +37,7 @@ export default function Team() {
     >
       {value == "admin" ? (
         <AdminPanelSettingsOutlinedIcon />
-      ) : value == "user" ? (
+      ) : value == "doctor" ? (
         <LockOpenOutlinedIcon />
       ) : (
         <SecurityOutlinedIcon />
@@ -57,6 +45,7 @@ export default function Team() {
       <Typography>{value}</Typography>
     </Box>
   );
+
   const columns = [
     //{ field: "id", headerName: "ID" },
     {
@@ -77,10 +66,10 @@ export default function Team() {
       headerName: "Specialization",
       headerAlign: "left", // Sütun başlığının sola hizalanması
       align: "left", // Hücre içeriğinin sola hizalanması
-      flex: 0.6
+      flex: 0.7,
     },
-    { field: "phone_number", headerName: "Phone Number", flex: 1 },
-    { field: "email", headerName: "Email", flex: 1 },
+    { field: "phone_number", headerName: "Phone Number", flex: 0.7 },
+    { field: "email", headerName: "Email", flex: 0.7 },
     {
       field: "role",
       headerName: "Access Level",
@@ -89,28 +78,34 @@ export default function Team() {
     },
   ];
 
-  const clickToAddDoktor = () => {
-    navigate("/addDoctor");
-  };
+  useEffect(()=>{
+    const fetchAllDoctors = async ()=>{
+        try{
+            const response = await tenantService.getAllDoctor(token);
+            setAdminDoctors(response.doctors.admins)
+            const formattedDoctors = response.doctors.admins
+            .flatMap(admin=> admin.normalDoctors)
+            .filter(doctor=> doctor.role === "doctor");
+            setUserDoctors(formattedDoctors)
+        }catch(error){
+            console.log("Doctorları şekerken bir sorun oluştu.")
+        }
+    }
+    fetchAllDoctors();
+  },[token])
   return (
-    <Box marginLeft={2} marginRight={2}>
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        <Headeer title="TEAM" subtitle="Managing Team Members" />
-        <Buttonn onClick={clickToAddDoktor}>
-          Add Doctor
-          <AddCircleIcon sx={{ marginLeft: "8px" }} />
-        </Buttonn>
-      </Box>
-
+    <Box sx={{ width: "100%" }}>
+      <TopbarOfTenant />
       <Box
         height="100vh"
         sx={{
+
+            m:4,
+            display:"flex",
+            justifyContent:"center",
+            alignItems:"center",
+            flexDirection: "column",
+            
           "& .MuiDataGrid-root": {
             border: "none",
           },
@@ -140,9 +135,10 @@ export default function Team() {
           style={{
             color: "inherit",
             backgroundColor: colors.primary[400],
+            width:"90%"
           }}
           checkboxSelection
-          rows={doctors}
+          rows={allDoctors}
           columns={columns}
           onSelectionModelChange={handleSelectionChange}
         />

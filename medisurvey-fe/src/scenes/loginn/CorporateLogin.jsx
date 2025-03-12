@@ -11,13 +11,13 @@ export default function CorporateLogin() {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const tenantService = new TenantService();
-  const [phoneNumber, setPhoneNumber] = useState("");
+  const [email, setEmail] = useState("");
   const [passwordValue, setPasswordValue] = useState("");
   const navigate = useNavigate();
 
   const clickToLogin = async () => {
     const tenantData = {
-      phone_number: phoneNumber,
+      email: email,
       password: passwordValue,
     };
 
@@ -69,8 +69,8 @@ export default function CorporateLogin() {
           </Typography>
 
           <TextField
-            value={phoneNumber}
-            onChange={(e) => setPhoneNumber(e.target.value)}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             sx={{
               backgroundColor: colors.grey[200],
               width: "50%",
@@ -78,7 +78,7 @@ export default function CorporateLogin() {
               margin: 2,
             }}
             id="filled-basic"
-            label="Phone Number"
+            label="Email"
             variant="filled"
             InputProps={{
               sx: {

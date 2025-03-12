@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Sidebar, Menu, MenuItem, sidebarClasses } from "react-pro-sidebar";
 import { tokens } from "../../theme";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
@@ -15,7 +15,9 @@ import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
 import MapOutlinedIcon from "@mui/icons-material/MapOutlined";
 import { Box, IconButton, Typography, useTheme } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import PersonAddIcon from "@mui/icons-material/PersonAdd";
+import DoctorService from "../../services/doctorService";
+import CreateNewFolderIcon from '@mui/icons-material/CreateNewFolder';
 
 export default function Sidebaar() {
   const theme = useTheme(); //useTheme hook'u, ThemeProvider tarafından sağlanan temayı almanıza yardımcı olur.
@@ -23,6 +25,8 @@ export default function Sidebaar() {
   const [isCollapsed, setIsCollapsed] = useState(false); //kapalılık falsa yani başlangıçta sidebar açık olacak
   const [selected, setSelected] = useState("Dashboard");
   const navigate = useNavigate();
+  const [doctorInfo, setDoctorInfo] = useState(null);
+  
   const handleClick = () => {
     // "/other" sayfasına yönlendirme
     navigate("/dashboard");
@@ -30,6 +34,21 @@ export default function Sidebaar() {
   const handleClickTeam = () => {
     navigate("/team");
   };
+  const doctorService = new DoctorService();
+
+  // Component yüklendiğinde doktor bilgilerini çek
+  useEffect(() => {
+    const fetchDoctorInfo = async () => {
+      try {
+        const info = await doctorService.getDoctorInfo();
+        setDoctorInfo(info);
+        console.log(info);
+      } catch (error) {
+        console.error("Error fetching doctor info:", error);
+      }
+    };
+    fetchDoctorInfo();
+  }, [doctorInfo]);
   return (
     <Box>
       <Sidebar
@@ -50,7 +69,8 @@ export default function Sidebaar() {
             },
           }}
         >
-          {//LOGO AND MENU ICON
+          {
+            //LOGO AND MENU ICON
           }
           <MenuItem
             onClick={() => setIsCollapsed(!isCollapsed)}
@@ -83,7 +103,7 @@ export default function Sidebaar() {
                   alt="profile-user"
                   width="100px"
                   height="100px"
-                  src={`../../assets/DR-BasriSezer.jpg`}
+                  src={`../../assets/avatarPhoto.jpg`}
                   style={{ cursor: "pointer", borderRadius: "50%" }}
                 />
               </Box>
@@ -94,10 +114,10 @@ export default function Sidebaar() {
                   fontWeight="bold"
                   sx={{ m: "10px 0 0 0" }}
                 >
-                  Hasan Basri Sezer
+                  {doctorInfo?.doctor?.name} {doctorInfo?.doctor?.surname}
                 </Typography>
                 <Typography variant="h5" color={colors.greenAccent[500]}>
-                Orthopedic Specialist
+                  {doctorInfo?.doctor?.specialization}
                 </Typography>
               </Box>
             </Box>
@@ -127,7 +147,6 @@ export default function Sidebaar() {
             >
               Patients
             </MenuItem>
-            
 
             <MenuItem
               onClick={() => {
@@ -162,8 +181,30 @@ export default function Sidebaar() {
             >
               Add Patient
             </MenuItem>
-            <MenuItem onClick={()=>{navigate("/calendar")}} icon={<CalendarTodayOutlinedIcon />}>Calendar</MenuItem>
-            <MenuItem onClick={()=>{navigate("/faq")}} icon={<HelpOutlineOutlinedIcon />}>Faq Page</MenuItem>
+            <MenuItem
+              onClick={() => {
+                navigate("/Create-NewFile");
+              }}
+              icon={<CreateNewFolderIcon />}
+            >
+              Create New File
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                navigate("/calendar");
+              }}
+              icon={<CalendarTodayOutlinedIcon />}
+            >
+              Calendar
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                navigate("/faq");
+              }}
+              icon={<HelpOutlineOutlinedIcon />}
+            >
+              Faq Page
+            </MenuItem>
             <Typography
               variant="h6"
               color={colors.grey[300]}
@@ -171,12 +212,38 @@ export default function Sidebaar() {
             >
               Charts
             </Typography>
-            <MenuItem onClick={()=>{navigate("/bar")}} icon={<BarChartOutlinedIcon />}>Bar Chart</MenuItem>
-            <MenuItem onClick={()=>{navigate("/pie")}} icon={<PieChartOutlineOutlinedIcon />}>
+            <MenuItem
+              onClick={() => {
+                navigate("/bar");
+              }}
+              icon={<BarChartOutlinedIcon />}
+            >
+              Bar Chart
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                navigate("/pie");
+              }}
+              icon={<PieChartOutlineOutlinedIcon />}
+            >
               Pie Chart
             </MenuItem>
-            <MenuItem onClick={()=>{navigate("/line")}} icon={<TimelineOutlinedIcon />}>Line Chart</MenuItem>
-            <MenuItem onClick={()=>{navigate("/geography")}} icon={<MapOutlinedIcon />}>Geography Chart</MenuItem>
+            <MenuItem
+              onClick={() => {
+                navigate("/line");
+              }}
+              icon={<TimelineOutlinedIcon />}
+            >
+              Line Chart
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                navigate("/geography");
+              }}
+              icon={<MapOutlinedIcon />}
+            >
+              Geography Chart
+            </MenuItem>
           </Box>
         </Menu>
       </Sidebar>

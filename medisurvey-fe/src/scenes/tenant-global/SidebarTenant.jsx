@@ -1,6 +1,7 @@
 import { Box, Drawer, List, ListItem, ListItemText, IconButton, Typography, Divider } from "@mui/material";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import GroupsIcon from '@mui/icons-material/Groups';
 import CloseIcon from "@mui/icons-material/Close";
 import React from "react";
 import { useNavigate } from "react-router-dom";
@@ -25,7 +26,6 @@ export default function SidebarTenant({ menuOpen, setMenuOpen }) {
         {/* Menü Öğeleri */}
         <List>
           <ListItem 
-            button 
             onClick={() => navigate("/tenant/dashboard")}
             sx={{ "&:hover": { bgcolor: "#e0e0e0" } }}
           >
@@ -33,13 +33,19 @@ export default function SidebarTenant({ menuOpen, setMenuOpen }) {
             <ListItemText primary="Dashboard" sx={{ color: "black" }} />
           </ListItem>
 
-          <ListItem 
-            button 
+          <ListItem       
             onClick={() => navigate("/tenant/profile")}
             sx={{ "&:hover": { bgcolor: "#e0e0e0" } }}
           >
             <AccountCircleIcon sx={{ mr: 2, color: "#333" }} />
             <ListItemText primary="Profile" sx={{ color: "black" }} />
+          </ListItem>
+          <ListItem
+          onClick={() => navigate("/tenant/doctors")}
+          sx={{ "&:hover": { bgcolor: "#e0e0e0" } }}
+        >
+          <GroupsIcon sx={{ mr: 2, color: "#333" }}/>
+            <ListItemText primary="Doctors" sx={{ color: "black" }}/>
           </ListItem>
         </List>
       </Box>

@@ -18,7 +18,7 @@ export default class TenantService{
     }
     getAllDoctor = async (token) => { 
         try {
-            const response = await axios.get("http://localhost:3000/api/doctors", {
+            const response = await axios.get("http://localhost:3000/api/doctors/tenant/all", {
                 headers: {
                     Authorization: `Bearer ${token}`, // Bearer token'ı Authorization header'ında gönderiyoruz
                 },
@@ -39,6 +39,20 @@ export default class TenantService{
             return response.data;
         }catch(error){
             console.log("Bilgiler yüklenirken bir hata oluştu.")
+            throw error;
+        }
+    }
+    updateTenant =async(data,tenantId,token)=>{
+        try{
+            const response = await axios.put(`http://localhost:3000/api/tenants/${tenantId}`,
+                data,{
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            })
+            return response.data;
+        }catch(error){
+            console.log("Bilgi değiştirme işlemi yapılırken bir hata oluştu.")
             throw error;
         }
     }

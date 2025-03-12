@@ -11,19 +11,27 @@ import TopbarOfTenant from "../tenant-global/TopbarTenant";
 export default function TenDashboard() {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-  const [doctors, setDoctors] = useState([]);debugger;
+  const [adminDoctors, setAdminDoctors] = useState([]);
+  const [userDoctors, setUserDoctors] = useState([])
   const token = localStorage.getItem("tokenTenant"); // Token anahtarını buraya yaz
-  
   const tenantService = new TenantService();
-  useEffect(() => {
-    tenantService.getAllDoctor(token)
-      .then((data) => {
-        setDoctors(data); // API'den gelen veriyi state'e kaydet
-      })
-      .catch((error) => {
-        console.error("Doktorları çekerken hata oluştu:", error);
-      });
-  }, [token]); // Token değişirse tekrar çalışır
+  const allDoctors = [...adminDoctors,...userDoctors]
+  useEffect(() => { 
+    const fetchAllDoctors = async ()=>{
+      try{
+        const response = await tenantService.getAllDoctor(token)
+        setAdminDoctors(response.doctors.admins)
+        const formattedDoctors = response.doctors.admins
+        .flatMap(admin => admin.normalDoctors) // Tüm adminlerin normalDoctors dizilerini tek dizi yap
+        .filter(doctor => doctor.role === "doctor"); // Sadece role: doctor olanları al
+
+      setUserDoctors(formattedDoctors);
+      }catch(error){
+        console.log("Sorun oluştu")
+      }
+    }
+    fetchAllDoctors();
+   },[token]); // Token değişirse tekrar çalışır
 
   return (
     <Box sx={{ width: "100%" }}>
@@ -49,7 +57,7 @@ export default function TenDashboard() {
                   Total Number of Doctor
                 </Typography>
                 <Typography variant="h2">
-                  <CountUp start={0} end={doctors.length} duration={2.5} />
+                  <CountUp start={0} end={allDoctors.length} duration={2.5} />
                 </Typography>
               </Box>
             </Grid>
@@ -67,10 +75,10 @@ export default function TenDashboard() {
                 }}
               >
                 <Typography sx={{ mb: 1 }} variant="h4">
-                  Total Patient Patients
+                Total Number of Admin Doctor
                 </Typography>
                 <Typography variant="h2">
-                  <CountUp start={0} end={200} duration={2.5} />
+                  <CountUp start={0} end={adminDoctors.length} duration={2.5} />
                 </Typography>
               </Box>
             </Grid>
@@ -88,10 +96,10 @@ export default function TenDashboard() {
                 }}
               >
                 <Typography sx={{ mb: 1 }} variant="h4">
-                  Total Patient Files
+                Total Number of Normal Doctor
                 </Typography>
                 <Typography variant="h2">
-                  <CountUp start={0} end={150} duration={2.5} />
+                  <CountUp start={0} end={userDoctors.length} duration={2.5} />
                 </Typography>
               </Box>
             </Grid>
