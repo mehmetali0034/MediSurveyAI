@@ -29,7 +29,7 @@ export default function TenantProfile() {
       .catch((error) => {
         console.error("Doktor bilgileri çekilirken hata oluştu", error);
       });
-  }, [token]);
+  }, [tenantInfo]);
 
   const clickToEdit = () => {
     setIsEditing(true);
@@ -97,7 +97,7 @@ export default function TenantProfile() {
         ) : (
           <Box sx={{ display: "flex", mt: 2, flexDirection: "column" }}>
             <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-              <Typography variant="body1" sx={{ mr: 2, color: "black" }}>
+              <Typography variant="body1" sx={{ mr: 2, color: "black",width: "13%" }}>
                 Institution Name:
               </Typography>
               <TextField
@@ -213,7 +213,7 @@ export default function TenantProfile() {
               />
             </Box>
             <Box sx={{ display: "flex", flexDirection: "row", justifyContent: "space-between" }}>
-              <Box sx={{ ml: 14 }}>
+              <Box sx={{ ml: 17 }}>
                 <Button
                   variant="contained"
                   sx={{ mr: 1, backgroundColor: colors.blueAccent[800] }}

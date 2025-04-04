@@ -24,6 +24,11 @@ import TenDashboard from "./scenes/dashboard/TenDashboard";
 import TenantProfile from "./scenes/profile/tenantProfile"
 import CreateNewFile from "./scenes/createFile"
 import TenantDoctors from "./scenes/tenant-doctors"
+import TenantPatients from "./scenes/tenant-patients"
+import TenantsDoctorProfile from "./scenes/profile/tenantsDoctorProfile"
+import TenantsPatientProfile from "./scenes/profile/TenantsPatientProfile";
+
+
 
 function App() {
   const [theme, colorMode] = useMode();
@@ -44,6 +49,9 @@ function App() {
             <Route path="/tenant/dashboard" element={<TenDashboard />} />
             <Route path="/tenant/profile" element={<TenantProfile/>}/>
             <Route path="/tenant/doctors" element={<TenantDoctors/>}/>
+            <Route path="/tenant/patients" element={<TenantPatients/>}/>
+            <Route path="/tenant/doctors/:id" element={<TenantsDoctorProfile/>}/>
+            <Route path="/tenant/patients/:id" element={<TenantsPatientProfile/>}/>
             <Route
               path="/*"
               element={

@@ -1,4 +1,4 @@
-import { Box, filledInputClasses, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import TopbarOfTenant from "../tenant-global/TopbarTenant";
 import { useTheme } from "@emotion/react";
@@ -8,17 +8,20 @@ import TenantService from "../../services/tenantService";
 import AdminPanelSettingsOutlinedIcon from "@mui/icons-material/AdminPanelSettingsOutlined";
 import LockOpenOutlinedIcon from "@mui/icons-material/LockOpenOutlined";
 import SecurityOutlinedIcon from "@mui/icons-material/SecurityOutlined";
+import { useNavigate } from "react-router-dom";
 
 export default function TenantDoctors() {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const tenantService = new TenantService();
+  const navigate = useNavigate();
   const token = localStorage.getItem("tokenTenant")
   const [adminDoctors, setAdminDoctors] = useState([])
   const [userDoctors, setUserDoctors] = useState([])
   const [selectedItems, setSelectedItems] = useState([]);
   const allDoctors =[...adminDoctors,...userDoctors]
-
+  
+  
   const handleSelectionChange = (selectionModel) => {
     setSelectedItems(selectionModel);
     console.log("Selected Items:", selectedItems);
@@ -78,6 +81,10 @@ export default function TenantDoctors() {
     },
   ];
 
+  const handleRowClick = (params) => {
+    navigate(`/tenant/doctors/${params.id}`);
+  }; 
+
   useEffect(()=>{
     const fetchAllDoctors = async ()=>{
         try{
@@ -92,7 +99,7 @@ export default function TenantDoctors() {
         }
     }
     fetchAllDoctors();
-  },[token])
+  },[adminDoctors,userDoctors])
   return (
     <Box sx={{ width: "100%" }}>
       <TopbarOfTenant />
@@ -100,7 +107,7 @@ export default function TenantDoctors() {
         height="100vh"
         sx={{
 
-            m:4,
+            m:5,
             display:"flex",
             justifyContent:"center",
             alignItems:"center",
@@ -141,6 +148,7 @@ export default function TenantDoctors() {
           rows={allDoctors}
           columns={columns}
           onSelectionModelChange={handleSelectionChange}
+          onRowClick={handleRowClick} 
         />
       </Box>
     </Box>

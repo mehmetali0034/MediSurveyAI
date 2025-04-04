@@ -11,10 +11,11 @@ import TopbarOfTenant from "../tenant-global/TopbarTenant";
 export default function TenDashboard() {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+  const tenantService = new TenantService();
   const [adminDoctors, setAdminDoctors] = useState([]);
   const [userDoctors, setUserDoctors] = useState([])
   const token = localStorage.getItem("tokenTenant"); // Token anahtarını buraya yaz
-  const tenantService = new TenantService();
+  const [patients, setPatients] = useState([])
   const allDoctors = [...adminDoctors,...userDoctors]
   useEffect(() => { 
     const fetchAllDoctors = async ()=>{
@@ -30,8 +31,14 @@ export default function TenDashboard() {
         console.log("Sorun oluştu")
       }
     }
+    const fetchAllPatients=async ()=>{
+      const response = await tenantService.getAllPatients(token)
+      console.log("Hastalarım",response.patients)
+      setPatients(response.patients) ;debugger;
+    }
+    fetchAllPatients();
     fetchAllDoctors();
-   },[token]); // Token değişirse tekrar çalışır
+   },[adminDoctors,userDoctors]); // Token değişirse tekrar çalışır
 
   return (
     <Box sx={{ width: "100%" }}>
@@ -117,10 +124,10 @@ export default function TenDashboard() {
                 }}
               >
                 <Typography sx={{ mb: 1, textAlign: "center" }} variant="h4">
-                  Number of Admin Doctors
+                  Total Number Of Patients  
                 </Typography>
                 <Typography variant="h2">
-                  <CountUp start={0} end={10} duration={2.5} />
+                  <CountUp start={0} end={patients.length} duration={2.5} />
                 </Typography>
               </Box>
             </Grid>
