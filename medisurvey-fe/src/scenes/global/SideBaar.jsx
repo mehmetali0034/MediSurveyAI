@@ -18,6 +18,7 @@ import { useNavigate } from "react-router-dom";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import DoctorService from "../../services/doctorService";
 import CreateNewFolderIcon from '@mui/icons-material/CreateNewFolder';
+import NoteAddIcon from '@mui/icons-material/NoteAdd';
 
 export default function Sidebaar() {
   const theme = useTheme(); //useTheme hook'u, ThemeProvider tarafından sağlanan temayı almanıza yardımcı olur.
@@ -48,7 +49,7 @@ export default function Sidebaar() {
       }
     };
     fetchDoctorInfo();
-  }, [doctorInfo]);
+  }, []);
   return (
     <Box>
       <Sidebar
@@ -188,6 +189,14 @@ export default function Sidebaar() {
               icon={<CreateNewFolderIcon />}
             >
               Create New File
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                navigate("/Create-NewForm");
+              }}
+              icon={<NoteAddIcon />}
+            >
+              Create New Form
             </MenuItem>
             <MenuItem
               onClick={() => {
