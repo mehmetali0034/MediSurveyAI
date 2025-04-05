@@ -198,6 +198,7 @@ export default function TenantRegister() {
                   <TextField
                     fullWidth
                     name="password"
+                    type="password"
                     label="Password"
                     variant="filled"
                     value={values.password}
@@ -209,6 +210,7 @@ export default function TenantRegister() {
                   <TextField
                     fullWidth
                     name="password_confirmation"
+                    type="password"
                     label="Password Confirmation"
                     variant="filled"
                     value={values.password_confirmation}
