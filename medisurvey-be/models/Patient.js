@@ -38,13 +38,17 @@ const Patient = sequelize.define('Patient', {
     type: DataTypes.STRING,
     allowNull: true,
   },
-  file: {
-    type: DataTypes.STRING, 
+  fileId: {
+    type: DataTypes.UUID, 
     allowNull: true,
+    references: {
+      model: 'Files', 
+      key: 'id',
+    },
   },
   doctorId: {
     type: DataTypes.UUID, 
-    allowNull: false,
+    allowNull: true,
     references: {
       model: Doctor, 
       key: 'id',
