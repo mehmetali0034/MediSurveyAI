@@ -41,6 +41,9 @@ Form.hasMany(FormAnswers, { foreignKey: 'form_id', onDelete: 'CASCADE' });
 FormAnswers.belongsTo(Patient, { foreignKey: 'patient_id' });
 Patient.hasMany(FormAnswers, { foreignKey: 'patient_id' });
 
+Patient.belongsTo(File, { foreignKey: 'fileId' });
+File.hasMany(Patient, { foreignKey: 'fileId' });
+
 dotenv.config();
 
 const init = async () => {
@@ -56,11 +59,12 @@ const init = async () => {
         console.log('Doctor tablosu oluşturuluyor...');
         await Doctor.sync({ force: false });
         
+        console.log('File tablosu oluşturuluyor...');
+        await File.sync({ force: false });
+
         console.log('Patient tablosu oluşturuluyor...');
         await Patient.sync({ force: false });
         
-        console.log('File tablosu oluşturuluyor...');
-        await File.sync({ force: false });
         
         console.log('Form tablosu oluşturuluyor...');
         await Form.sync({ force: false });
