@@ -1,6 +1,8 @@
 const FormAnswers = require('../models/FormAnswers');
 const Doctor = require('../models/Doctor');
 const Patient = require('../models/Patient');
+const Form = require('../models/Form');
+const File = require('../models/File');
 const { Op } = require('sequelize');
 
 const formAnswersController = {
@@ -47,7 +49,17 @@ const formAnswersController = {
       }
 
       const formAnswers = await FormAnswers.findAll({
-        where: whereCondition
+        where: whereCondition,
+        include: [
+          {
+            model: Form,
+            include: [
+              {
+                model: File
+              }
+            ]
+          }
+        ]
       });
       res.json(formAnswers);
     } catch (error) {
@@ -101,7 +113,17 @@ const formAnswersController = {
       }
 
       const formAnswer = await FormAnswers.findOne({
-        where: whereCondition
+        where: whereCondition,
+        include: [
+          {
+            model: Form,
+            include: [
+              {
+                model: File
+              }
+            ]
+          }
+        ]
       });
 
       if (!formAnswer) {
@@ -138,6 +160,21 @@ const formAnswersController = {
         return res.status(404).json({ message: 'Hasta bulunamadı' });
       }
 
+      const formId = req.body.formId || req.body.form_id;
+      if (!formId) {
+        return res.status(400).json({ message: 'Form kimliği bulunamadı' });
+      }
+
+      const form = await Form.findOne({
+        where: {
+          id: formId
+        }
+      });
+
+      if (!form) {
+        return res.status(404).json({ message: 'Form bulunamadı' });
+      }
+
       console.log('Form Answer will be created with created_by:', creatorId);
       
       const formAnswerData = {
@@ -156,13 +193,33 @@ const formAnswersController = {
         delete formAnswerData.patientId;
       }
 
+      if (formAnswerData.formId && !formAnswerData.form_id) {
+        formAnswerData.form_id = formAnswerData.formId;
+        delete formAnswerData.formId;
+      }
+
       if (formAnswerData.levelAnswers && !formAnswerData.level_answers) {
         formAnswerData.level_answers = formAnswerData.levelAnswers;
         delete formAnswerData.levelAnswers;
       }
       
       const formAnswer = await FormAnswers.create(formAnswerData);
-      res.status(201).json(formAnswer);
+      
+      const formAnswerWithRelations = await FormAnswers.findOne({
+        where: { id: formAnswer.id },
+        include: [
+          {
+            model: Form,
+            include: [
+              {
+                model: File
+              }
+            ]
+          }
+        ]
+      });
+      
+      res.status(201).json(formAnswerWithRelations);
     } catch (error) {
       console.error('Create Form Answer Error:', error);
       res.status(400).json({ message: error.message });
@@ -198,8 +255,48 @@ const formAnswersController = {
         delete updateData.levelAnswers;
       }
 
+      if (updateData.formId && !updateData.form_id) {
+        updateData.form_id = updateData.formId;
+        delete updateData.formId;
+      }
+
+      if (updateData.patient_id) {
+        const patient = await Patient.findOne({
+          where: { id: updateData.patient_id }
+        });
+        
+        if (!patient) {
+          return res.status(404).json({ message: 'Belirtilen hasta bulunamadı' });
+        }
+      }
+
+      if (updateData.form_id) {
+        const form = await Form.findOne({
+          where: { id: updateData.form_id }
+        });
+        
+        if (!form) {
+          return res.status(404).json({ message: 'Belirtilen form bulunamadı' });
+        }
+      }
+
       await formAnswer.update(updateData);
-      res.json(formAnswer);
+      
+      const updatedFormAnswer = await FormAnswers.findOne({
+        where: { id: formAnswer.id },
+        include: [
+          {
+            model: Form,
+            include: [
+              {
+                model: File
+              }
+            ]
+          }
+        ]
+      });
+      
+      res.json(updatedFormAnswer);
     } catch (error) {
       console.error('Update Form Answer Error:', error);
       res.status(400).json({ message: error.message });
@@ -256,7 +353,17 @@ const formAnswersController = {
           created_by: {
             [Op.in]: doctorIds
           }
-        }
+        },
+        include: [
+          {
+            model: Form,
+            include: [
+              {
+                model: File
+              }
+            ]
+          }
+        ]
       });
       
       console.log('Bulunan form cevapları sayısı:', formAnswers.length);
@@ -286,10 +393,20 @@ const formAnswersController = {
             [Op.in]: doctorIds
           }
         },
-        include: [{
-          model: Patient,
-          attributes: ['id', 'firstName', 'lastName']
-        }]
+        include: [
+          {
+            model: Patient,
+            attributes: ['id', 'firstName', 'lastName']
+          },
+          {
+            model: Form,
+            include: [
+              {
+                model: File
+              }
+            ]
+          }
+        ]
       });
       
       if (!formAnswer) {
@@ -343,8 +460,48 @@ const formAnswersController = {
         delete updateData.levelAnswers;
       }
 
+      if (updateData.formId && !updateData.form_id) {
+        updateData.form_id = updateData.formId;
+        delete updateData.formId;
+      }
+
+      if (updateData.patient_id) {
+        const patient = await Patient.findOne({
+          where: { id: updateData.patient_id }
+        });
+        
+        if (!patient) {
+          return res.status(404).json({ message: 'Belirtilen hasta bulunamadı' });
+        }
+      }
+
+      if (updateData.form_id) {
+        const form = await Form.findOne({
+          where: { id: updateData.form_id }
+        });
+        
+        if (!form) {
+          return res.status(404).json({ message: 'Belirtilen form bulunamadı' });
+        }
+      }
+
       await formAnswer.update(updateData);
-      res.json(formAnswer);
+      
+      const updatedFormAnswer = await FormAnswers.findOne({
+        where: { id: formAnswer.id },
+        include: [
+          {
+            model: Form,
+            include: [
+              {
+                model: File
+              }
+            ]
+          }
+        ]
+      });
+      
+      res.json(updatedFormAnswer);
     } catch (error) {
       console.error('Update Form Answer for Tenant Error:', error);
       res.status(400).json({ message: error.message });

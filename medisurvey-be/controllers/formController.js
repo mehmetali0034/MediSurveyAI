@@ -1,6 +1,7 @@
 const Form = require('../models/Form');
 const Doctor = require('../models/Doctor');
 const { Op } = require('sequelize');
+const File = require('../models/File');
 
 const formController = {
   getAllForms: async (req, res) => {
@@ -46,7 +47,12 @@ const formController = {
       }
 
       const forms = await Form.findAll({
-        where: whereCondition
+        where: whereCondition,
+        include: [
+          {
+            model: File
+          }
+        ]
       });
       res.json(forms);
     } catch (error) {
@@ -94,7 +100,12 @@ const formController = {
       }
 
       const form = await Form.findOne({
-        where: whereCondition
+        where: whereCondition,
+        include: [
+          {
+            model: File
+          }
+        ]
       });
 
       if (!form) {
@@ -140,7 +151,17 @@ const formController = {
       const form = await Form.create(formData);
       
       console.log('Form başarıyla oluşturuldu:', form.id);
-      res.status(201).json(form);
+      
+      const formWithFile = await Form.findOne({
+        where: { id: form.id },
+        include: [
+          {
+            model: File
+          }
+        ]
+      });
+      
+      res.status(201).json(formWithFile);
     } catch (error) {
       console.error('Create Form Error:', error);
       console.error('Create Form Error Stack:', error.stack);
@@ -182,7 +203,17 @@ const formController = {
         return res.status(404).json({ message: 'Form bulunamadı' });
       }
       await form.update(req.body);
-      res.json(form);
+      
+      const updatedForm = await Form.findOne({
+        where: { id: form.id },
+        include: [
+          {
+            model: File
+          }
+        ]
+      });
+      
+      res.json(updatedForm);
     } catch (error) {
       console.error('Update Form Error:', error);
       res.status(400).json({ message: error.message });
@@ -236,8 +267,7 @@ const formController = {
         console.error('Tenant ID bulunamadı, kullanıcı:', req.user);
         return res.status(400).json({ message: 'Tenant ID bulunamadı' });
       }
-      
-      // Tenant'ın doktorlarını bul
+
       const doctors = await Doctor.findAll({
         where: {
           tenant_id: req.user.tenant_id
@@ -249,7 +279,7 @@ const formController = {
       
       if (doctors.length === 0) {
         console.log('Bu tenant ID\'ye bağlı doktor bulunamadı:', req.user.tenant_id);
-        return res.json([]);  // Boş array dön
+        return res.json([]); 
       }
 
       const doctorIds = doctors.map(doctor => doctor.id);
@@ -260,7 +290,12 @@ const formController = {
           created_by: {
             [Op.in]: doctorIds
           }
-        }
+        },
+        include: [
+          {
+            model: File
+          }
+        ]
       });
       
       console.log('Bulunan form sayısı:', forms.length);
@@ -289,7 +324,12 @@ const formController = {
           created_by: {
             [Op.in]: doctorIds
           }
-        }
+        },
+        include: [
+          {
+            model: File
+          }
+        ]
       });
 
       if (!form) {
@@ -326,7 +366,17 @@ const formController = {
         return res.status(404).json({ message: 'Form bulunamadı' });
       }
       await form.update(req.body);
-      res.json(form);
+      
+      const updatedForm = await Form.findOne({
+        where: { id: form.id },
+        include: [
+          {
+            model: File
+          }
+        ]
+      });
+      
+      res.json(updatedForm);
     } catch (error) {
       console.error('Update Form for Tenant Error:', error);
       res.status(400).json({ message: error.message });
