@@ -38,7 +38,7 @@ export default function TenDashboard() {
     }
     fetchAllPatients();
     fetchAllDoctors();
-   },[adminDoctors,userDoctors]); // Token değişirse tekrar çalışır
+   },[]); // Token değişirse tekrar çalışır
 
   return (
     <Box sx={{ width: "100%" }}>
