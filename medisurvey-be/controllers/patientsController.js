@@ -35,15 +35,8 @@ const addPatient = async (req, res) => {
     const patientWithFile = await Patient.findOne({
       where: { id: newPatient.id },
       include: [
-        {
-          model: Doctor,
-          attributes: ['id', 'tenant_id', 'created_by']
-        }, 
-        {
-          model: File,
-          attributes: ['id', 'name'],
-          required: false
-        }
+        Doctor, 
+        File
       ]
     });
 
@@ -87,15 +80,8 @@ const addPatientByTenant = async (req, res) => {
     const patientWithFile = await Patient.findOne({
       where: { id: newPatient.id },
       include: [
-        {
-          model: Doctor,
-          attributes: ['id', 'tenant_id', 'created_by', 'name', 'surname', 'email', 'role']
-        }, 
-        {
-          model: File,
-          attributes: ['id', 'name'],
-          required: false
-        }
+        Doctor, 
+        File
       ]
     });
 
@@ -117,15 +103,8 @@ const getPatientInfo = async (req, res) => {
     const patient = await Patient.findOne({
       where: { id },
       include: [
-        {
-          model: Doctor,
-          attributes: ['id', 'tenant_id', 'created_by']
-        }, 
-        {
-          model: File,
-          attributes: ['id', 'name'],
-          required: false
-        }
+        Doctor,
+        File
       ]
     });
 
@@ -176,14 +155,9 @@ const getPatientInfoByTenant = async (req, res) => {
       include: [
         {
           model: Doctor,
-          where: { tenant_id: tenantId },
-          attributes: ['id', 'name', 'surname', 'email', 'tenant_id', 'created_by', 'role']
-        }, 
-        {
-          model: File,
-          attributes: ['id', 'name'],
-          required: false
-        }
+          where: { tenant_id: tenantId }
+        },
+        File
       ]
     });
 
@@ -221,30 +195,16 @@ const getAllPatients = async (req, res) => {
           }
         },
         include: [
-          {
-            model: Doctor,
-            attributes: ['name', 'surname', 'email']
-          }, 
-          {
-            model: File,
-            attributes: ['id', 'name'],
-            required: false
-          }
+          Doctor, 
+          File
         ]
       });
     } else if (role === 'doctor') {
       patients = await Patient.findAll({
         where: { doctorId: doctorId },
         include: [
-          {
-            model: Doctor,
-            attributes: ['name', 'surname', 'email']
-          }, 
-          {
-            model: File,
-            attributes: ['id', 'name'],
-            required: false
-          }
+          Doctor, 
+          File
         ]
       });
     } else {
@@ -285,7 +245,7 @@ const getAllPatientsByTenant = async (req, res) => {
       include: [
         {
           model: Doctor,
-          where: {
+          where: { 
             [Op.or]: [
               { id: { [Op.in]: adminIds } }, 
               { 
@@ -293,14 +253,9 @@ const getAllPatientsByTenant = async (req, res) => {
                 tenant_id: tenantId
               }
             ]
-          },
-          attributes: ['id', 'name', 'surname', 'email', 'role', 'specialization', 'created_by']
-        }, 
-        {
-          model: File,
-          attributes: ['id', 'name'],
-          required: false
-        }
+          }
+        },
+        File
       ]
     });
 
@@ -327,15 +282,8 @@ const updatePatient = async (req, res) => {
     const patient = await Patient.findOne({
       where: { id },
       include: [
-        {
-          model: Doctor,
-          attributes: ['id', 'tenant_id', 'created_by']
-        }, 
-        {
-          model: File,
-          attributes: ['id', 'name'],
-          required: false
-        }
+        Doctor, 
+        File
       ]
     });
 
@@ -364,15 +312,8 @@ const updatePatient = async (req, res) => {
     const updatedPatient = await Patient.findOne({
       where: { id },
       include: [
-        {
-          model: Doctor,
-          attributes: ['id', 'tenant_id', 'created_by']
-        }, 
-        {
-          model: File,
-          attributes: ['id', 'name'],
-          required: false
-        }
+        Doctor, 
+        File
       ]
     });
     
@@ -404,14 +345,9 @@ const updatePatientByTenant = async (req, res) => {
       include: [
         {
           model: Doctor,
-          where: { tenant_id: tenantId },
-          attributes: ['id', 'tenant_id', 'created_by', 'role']
-        }, 
-        {
-          model: File,
-          attributes: ['id', 'name'],
-          required: false
-        }
+          where: { tenant_id: tenantId }
+        },
+        File
       ]
     });
 
@@ -426,14 +362,9 @@ const updatePatientByTenant = async (req, res) => {
       include: [
         {
           model: Doctor,
-          where: { tenant_id: tenantId },
-          attributes: ['id', 'tenant_id', 'created_by', 'role']
-        }, 
-        {
-          model: File,
-          attributes: ['id', 'name'],
-          required: false
-        }
+          where: { tenant_id: tenantId }
+        },
+        File
       ]
     });
     
@@ -454,12 +385,7 @@ const deletePatient = async (req, res) => {
 
     const patient = await Patient.findOne({
       where: { id },
-      include: [
-        {
-          model: Doctor,
-          attributes: ['id', 'tenant_id', 'created_by']
-        }
-      ]
+      include: [Doctor]
     });
 
     if (!patient) {
@@ -510,8 +436,7 @@ const deletePatientByTenant = async (req, res) => {
       include: [
         {
           model: Doctor,
-          where: { tenant_id: tenantId },
-          attributes: ['id', 'tenant_id', 'created_by', 'role']
+          where: { tenant_id: tenantId }
         }
       ]
     });
