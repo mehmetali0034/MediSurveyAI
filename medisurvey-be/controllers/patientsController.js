@@ -34,13 +34,17 @@ const addPatient = async (req, res) => {
 
     const patientWithFile = await Patient.findOne({
       where: { id: newPatient.id },
-      include: [{
-        model: Doctor,
-        attributes: ['id', 'tenant_id', 'created_by']
-      }, {
-        model: File,
-        attributes: ['id', 'name']
-      }]
+      include: [
+        {
+          model: Doctor,
+          attributes: ['id', 'tenant_id', 'created_by']
+        }, 
+        {
+          model: File,
+          attributes: ['id', 'name'],
+          required: false
+        }
+      ]
     });
 
     res.status(201).json({ status: 'success', patient: patientWithFile });
@@ -82,13 +86,17 @@ const addPatientByTenant = async (req, res) => {
 
     const patientWithFile = await Patient.findOne({
       where: { id: newPatient.id },
-      include: [{
-        model: Doctor,
-        attributes: ['id', 'tenant_id', 'created_by', 'name', 'surname', 'email', 'role']
-      }, {
-        model: File,
-        attributes: ['id', 'name']
-      }]
+      include: [
+        {
+          model: Doctor,
+          attributes: ['id', 'tenant_id', 'created_by', 'name', 'surname', 'email', 'role']
+        }, 
+        {
+          model: File,
+          attributes: ['id', 'name'],
+          required: false
+        }
+      ]
     });
 
     res.status(201).json({ status: 'success', patient: patientWithFile });
@@ -108,13 +116,17 @@ const getPatientInfo = async (req, res) => {
     const { id } = req.params;
     const patient = await Patient.findOne({
       where: { id },
-      include: [{
-        model: Doctor,
-        attributes: ['id', 'tenant_id', 'created_by']
-      }, {
-        model: File,
-        attributes: ['id', 'name']
-      }]
+      include: [
+        {
+          model: Doctor,
+          attributes: ['id', 'tenant_id', 'created_by']
+        }, 
+        {
+          model: File,
+          attributes: ['id', 'name'],
+          required: false
+        }
+      ]
     });
 
     if (!patient) {
@@ -161,14 +173,18 @@ const getPatientInfoByTenant = async (req, res) => {
     const { id } = req.params;
     const patient = await Patient.findOne({
       where: { id },
-      include: [{
-        model: Doctor,
-        where: { tenant_id: tenantId },
-        attributes: ['id', 'name', 'surname', 'email', 'tenant_id', 'created_by', 'role']
-      }, {
-        model: File,
-        attributes: ['id', 'name']
-      }]
+      include: [
+        {
+          model: Doctor,
+          where: { tenant_id: tenantId },
+          attributes: ['id', 'name', 'surname', 'email', 'tenant_id', 'created_by', 'role']
+        }, 
+        {
+          model: File,
+          attributes: ['id', 'name'],
+          required: false
+        }
+      ]
     });
 
     if (!patient) {
@@ -204,24 +220,32 @@ const getAllPatients = async (req, res) => {
             [Op.in]: allowedDoctorIds
           }
         },
-        include: [{
-          model: Doctor,
-          attributes: ['name', 'surname', 'email']
-        }, {
-          model: File,
-          attributes: ['id', 'name']
-        }]
+        include: [
+          {
+            model: Doctor,
+            attributes: ['name', 'surname', 'email']
+          }, 
+          {
+            model: File,
+            attributes: ['id', 'name'],
+            required: false
+          }
+        ]
       });
     } else if (role === 'doctor') {
       patients = await Patient.findAll({
         where: { doctorId: doctorId },
-        include: [{
-          model: Doctor,
-          attributes: ['name', 'surname', 'email']
-        }, {
-          model: File,
-          attributes: ['id', 'name']
-        }]
+        include: [
+          {
+            model: Doctor,
+            attributes: ['name', 'surname', 'email']
+          }, 
+          {
+            model: File,
+            attributes: ['id', 'name'],
+            required: false
+          }
+        ]
       });
     } else {
       return res.status(403).json({ message: 'Bu işlem için yetkiniz yok!' });
@@ -258,22 +282,26 @@ const getAllPatientsByTenant = async (req, res) => {
     const adminIds = adminDoctors.map(admin => admin.id);
 
     const patients = await Patient.findAll({
-      include: [{
-        model: Doctor,
-        where: {
-          [Op.or]: [
-            { id: { [Op.in]: adminIds } }, 
-            { 
-              created_by: { [Op.in]: adminIds }, 
-              tenant_id: tenantId
-            }
-          ]
-        },
-        attributes: ['id', 'name', 'surname', 'email', 'role', 'specialization', 'created_by']
-      }, {
-        model: File,
-        attributes: ['id', 'name']
-      }]
+      include: [
+        {
+          model: Doctor,
+          where: {
+            [Op.or]: [
+              { id: { [Op.in]: adminIds } }, 
+              { 
+                created_by: { [Op.in]: adminIds }, 
+                tenant_id: tenantId
+              }
+            ]
+          },
+          attributes: ['id', 'name', 'surname', 'email', 'role', 'specialization', 'created_by']
+        }, 
+        {
+          model: File,
+          attributes: ['id', 'name'],
+          required: false
+        }
+      ]
     });
 
     res.status(200).json({ 
@@ -298,13 +326,17 @@ const updatePatient = async (req, res) => {
 
     const patient = await Patient.findOne({
       where: { id },
-      include: [{
-        model: Doctor,
-        attributes: ['id', 'tenant_id', 'created_by']
-      }, {
-        model: File,
-        attributes: ['id', 'name']
-      }]
+      include: [
+        {
+          model: Doctor,
+          attributes: ['id', 'tenant_id', 'created_by']
+        }, 
+        {
+          model: File,
+          attributes: ['id', 'name'],
+          required: false
+        }
+      ]
     });
 
     if (!patient) {
@@ -331,13 +363,17 @@ const updatePatient = async (req, res) => {
     
     const updatedPatient = await Patient.findOne({
       where: { id },
-      include: [{
-        model: Doctor,
-        attributes: ['id', 'tenant_id', 'created_by']
-      }, {
-        model: File,
-        attributes: ['id', 'name']
-      }]
+      include: [
+        {
+          model: Doctor,
+          attributes: ['id', 'tenant_id', 'created_by']
+        }, 
+        {
+          model: File,
+          attributes: ['id', 'name'],
+          required: false
+        }
+      ]
     });
     
     res.status(200).json({ status: 'success', patient: updatedPatient });
@@ -365,14 +401,18 @@ const updatePatientByTenant = async (req, res) => {
 
     const patient = await Patient.findOne({
       where: { id },
-      include: [{
-        model: Doctor,
-        where: { tenant_id: tenantId },
-        attributes: ['id', 'tenant_id', 'created_by', 'role']
-      }, {
-        model: File,
-        attributes: ['id', 'name']
-      }]
+      include: [
+        {
+          model: Doctor,
+          where: { tenant_id: tenantId },
+          attributes: ['id', 'tenant_id', 'created_by', 'role']
+        }, 
+        {
+          model: File,
+          attributes: ['id', 'name'],
+          required: false
+        }
+      ]
     });
 
     if (!patient) {
@@ -383,14 +423,18 @@ const updatePatientByTenant = async (req, res) => {
     
     const updatedPatient = await Patient.findOne({
       where: { id },
-      include: [{
-        model: Doctor,
-        where: { tenant_id: tenantId },
-        attributes: ['id', 'tenant_id', 'created_by', 'role']
-      }, {
-        model: File,
-        attributes: ['id', 'name']
-      }]
+      include: [
+        {
+          model: Doctor,
+          where: { tenant_id: tenantId },
+          attributes: ['id', 'tenant_id', 'created_by', 'role']
+        }, 
+        {
+          model: File,
+          attributes: ['id', 'name'],
+          required: false
+        }
+      ]
     });
     
     res.status(200).json({ status: 'success', patient: updatedPatient });
@@ -410,10 +454,12 @@ const deletePatient = async (req, res) => {
 
     const patient = await Patient.findOne({
       where: { id },
-      include: [{
-        model: Doctor,
-        attributes: ['id', 'tenant_id', 'created_by']
-      }]
+      include: [
+        {
+          model: Doctor,
+          attributes: ['id', 'tenant_id', 'created_by']
+        }
+      ]
     });
 
     if (!patient) {
@@ -461,11 +507,13 @@ const deletePatientByTenant = async (req, res) => {
 
     const patient = await Patient.findOne({
       where: { id },
-      include: [{
-        model: Doctor,
-        where: { tenant_id: tenantId },
-        attributes: ['id', 'tenant_id', 'created_by', 'role']
-      }]
+      include: [
+        {
+          model: Doctor,
+          where: { tenant_id: tenantId },
+          attributes: ['id', 'tenant_id', 'created_by', 'role']
+        }
+      ]
     });
 
     if (!patient) {
