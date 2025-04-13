@@ -1,4 +1,4 @@
-const { Patient, Doctor } = require('../models');
+const { Patient, Doctor, File } = require('../models');
 const jwt = require('jsonwebtoken');
 const { Op } = require('sequelize');
 
@@ -13,13 +13,12 @@ const addPatient = async (req, res) => {
       return res.status(403).json({ message: 'Bu işlem için yetkiniz yok!' });
     }
 
-    // Doktorun varlığını kontrol et
     const doctor = await Doctor.findByPk(doctorId);
     if (!doctor) {
       return res.status(404).json({ message: 'Doktor bulunamadı!' });
     }
 
-    const { firstName, lastName, email, dateOfBirth, gender, primaryPhone, secondaryPhone, file } = req.body;
+    const { firstName, lastName, email, dateOfBirth, gender, primaryPhone, secondaryPhone, fileId } = req.body;
 
     const newPatient = await Patient.create({
       firstName,
@@ -29,11 +28,22 @@ const addPatient = async (req, res) => {
       gender,
       primaryPhone,
       secondaryPhone,
-      file,
+      fileId,
       doctorId: doctorId, 
     });
 
-    res.status(201).json({ status: 'success', patient: newPatient });
+    const patientWithFile = await Patient.findOne({
+      where: { id: newPatient.id },
+      include: [{
+        model: Doctor,
+        attributes: ['id', 'tenant_id', 'created_by']
+      }, {
+        model: File,
+        attributes: ['id', 'name']
+      }]
+    });
+
+    res.status(201).json({ status: 'success', patient: patientWithFile });
   } catch (error) {
     console.error('Hata:', error);
     res.status(500).json({ message: error.message });
@@ -48,26 +58,15 @@ const addPatientByTenant = async (req, res) => {
     }
 
     const decoded = jwt.verify(token, 'secretkey');
-    // Sadece tenant token'ı ile işlem yapılabilir
     if (decoded.role) {
       return res.status(403).json({ message: 'Bu işlem sadece tenant tarafından yapılabilir!' });
     }
 
     const tenantId = decoded.id;
 
-    const { firstName, lastName, email, dateOfBirth, gender, primaryPhone, secondaryPhone, file, doctorId } = req.body;
+    const { firstName, lastName, email, dateOfBirth, gender, primaryPhone, secondaryPhone, fileId, doctorId } = req.body;
 
-    // Doktorun tenant'a ait olup olmadığını kontrol et
-    const doctor = await Doctor.findOne({
-      where: { 
-        id: doctorId,
-        tenant_id: tenantId
-      }
-    });
 
-    if (!doctor) {
-      return res.status(403).json({ message: 'Belirtilen doktor sizin tenant\'ınıza ait değil!' });
-    }
 
     const newPatient = await Patient.create({
       firstName,
@@ -77,11 +76,22 @@ const addPatientByTenant = async (req, res) => {
       gender,
       primaryPhone,
       secondaryPhone,
-      file,
+      fileId,
       doctorId
     });
 
-    res.status(201).json({ status: 'success', patient: newPatient });
+    const patientWithFile = await Patient.findOne({
+      where: { id: newPatient.id },
+      include: [{
+        model: Doctor,
+        attributes: ['id', 'tenant_id', 'created_by', 'name', 'surname', 'email', 'role']
+      }, {
+        model: File,
+        attributes: ['id', 'name']
+      }]
+    });
+
+    res.status(201).json({ status: 'success', patient: patientWithFile });
   } catch (error) {
     console.error('Hata:', error);
     res.status(500).json({ message: error.message });
@@ -101,6 +111,9 @@ const getPatientInfo = async (req, res) => {
       include: [{
         model: Doctor,
         attributes: ['id', 'tenant_id', 'created_by']
+      }, {
+        model: File,
+        attributes: ['id', 'name']
       }]
     });
 
@@ -138,7 +151,7 @@ const getPatientInfoByTenant = async (req, res) => {
     }
 
     const decoded = jwt.verify(token, 'secretkey');
-    // Sadece tenant token'ı ile işlem yapılabilir
+
     if (decoded.role) {
       return res.status(403).json({ message: 'Bu işlem sadece tenant tarafından yapılabilir!' });
     }
@@ -152,6 +165,9 @@ const getPatientInfoByTenant = async (req, res) => {
         model: Doctor,
         where: { tenant_id: tenantId },
         attributes: ['id', 'name', 'surname', 'email', 'tenant_id', 'created_by', 'role']
+      }, {
+        model: File,
+        attributes: ['id', 'name']
       }]
     });
 
@@ -191,6 +207,9 @@ const getAllPatients = async (req, res) => {
         include: [{
           model: Doctor,
           attributes: ['name', 'surname', 'email']
+        }, {
+          model: File,
+          attributes: ['id', 'name']
         }]
       });
     } else if (role === 'doctor') {
@@ -199,6 +218,9 @@ const getAllPatients = async (req, res) => {
         include: [{
           model: Doctor,
           attributes: ['name', 'surname', 'email']
+        }, {
+          model: File,
+          attributes: ['id', 'name']
         }]
       });
     } else {
@@ -219,14 +241,12 @@ const getAllPatientsByTenant = async (req, res) => {
     }
 
     const decoded = jwt.verify(token, 'secretkey');
-    // Sadece tenant token'ı ile işlem yapılabilir
     if (decoded.role) {
       return res.status(403).json({ message: 'Bu işlem sadece tenant tarafından yapılabilir!' });
     }
 
     const tenantId = decoded.id;
 
-    // Önce tenant'a ait admin doktorları bul
     const adminDoctors = await Doctor.findAll({
       where: { 
         tenant_id: tenantId,
@@ -235,23 +255,24 @@ const getAllPatientsByTenant = async (req, res) => {
       attributes: ['id']
     });
 
-    // Admin doktorların ID'lerini al
     const adminIds = adminDoctors.map(admin => admin.id);
 
-    // Admin doktorlar ve onların oluşturduğu normal doktorların hastalarını bul
     const patients = await Patient.findAll({
       include: [{
         model: Doctor,
         where: {
           [Op.or]: [
-            { id: { [Op.in]: adminIds } }, // Admin doktorların hastaları
+            { id: { [Op.in]: adminIds } }, 
             { 
-              created_by: { [Op.in]: adminIds }, // Admin doktorların oluşturduğu doktorların hastaları
+              created_by: { [Op.in]: adminIds }, 
               tenant_id: tenantId
             }
           ]
         },
         attributes: ['id', 'name', 'surname', 'email', 'role', 'specialization', 'created_by']
+      }, {
+        model: File,
+        attributes: ['id', 'name']
       }]
     });
 
@@ -280,6 +301,9 @@ const updatePatient = async (req, res) => {
       include: [{
         model: Doctor,
         attributes: ['id', 'tenant_id', 'created_by']
+      }, {
+        model: File,
+        attributes: ['id', 'name']
       }]
     });
 
@@ -304,7 +328,19 @@ const updatePatient = async (req, res) => {
     }
 
     await patient.update(updateData);
-    res.status(200).json({ status: 'success', patient });
+    
+    const updatedPatient = await Patient.findOne({
+      where: { id },
+      include: [{
+        model: Doctor,
+        attributes: ['id', 'tenant_id', 'created_by']
+      }, {
+        model: File,
+        attributes: ['id', 'name']
+      }]
+    });
+    
+    res.status(200).json({ status: 'success', patient: updatedPatient });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -318,7 +354,6 @@ const updatePatientByTenant = async (req, res) => {
     }
 
     const decoded = jwt.verify(token, 'secretkey');
-    // Sadece tenant token'ı ile işlem yapılabilir
     if (decoded.role) {
       return res.status(403).json({ message: 'Bu işlem sadece tenant tarafından yapılabilir!' });
     }
@@ -334,6 +369,9 @@ const updatePatientByTenant = async (req, res) => {
         model: Doctor,
         where: { tenant_id: tenantId },
         attributes: ['id', 'tenant_id', 'created_by', 'role']
+      }, {
+        model: File,
+        attributes: ['id', 'name']
       }]
     });
 
@@ -342,7 +380,20 @@ const updatePatientByTenant = async (req, res) => {
     }
 
     await patient.update(updateData);
-    res.status(200).json({ status: 'success', patient });
+    
+    const updatedPatient = await Patient.findOne({
+      where: { id },
+      include: [{
+        model: Doctor,
+        where: { tenant_id: tenantId },
+        attributes: ['id', 'tenant_id', 'created_by', 'role']
+      }, {
+        model: File,
+        attributes: ['id', 'name']
+      }]
+    });
+    
+    res.status(200).json({ status: 'success', patient: updatedPatient });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -400,7 +451,6 @@ const deletePatientByTenant = async (req, res) => {
     }
 
     const decoded = jwt.verify(token, 'secretkey');
-    // Sadece tenant token'ı ile işlem yapılabilir
     if (decoded.role) {
       return res.status(403).json({ message: 'Bu işlem sadece tenant tarafından yapılabilir!' });
     }
