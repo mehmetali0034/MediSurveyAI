@@ -1,15 +1,17 @@
-import React from "react";
-import { Box } from "@mui/material";
+import React, { useState } from "react";
+import { Box, Button } from "@mui/material";
 import { mockDataInvoices } from "../../data/mockData";
 import Headeer from "../../components/Headeer";
 import { DataGrid } from "@mui/x-data-grid";
 import { tokens } from '../../theme';
 import { useTheme } from '@emotion/react';
+import Buttonn from "../../components/Buttonn";
+import CreateNewFile from "../../components/CreateNewFile";
 export default function Files() {
   const theme = useTheme();debugger;
   const colors = tokens(theme.palette.mode); 
-  console.log("Ali")
-  console.log(colors.blueAccent[400])
+  const [openDialog, setOpenDialog] = useState(false)
+ 
   const columns = [
     { field: "id", headerName: "ID" },
     {
@@ -45,9 +47,20 @@ export default function Files() {
     },
   ];
 
+  const handleClose=()=>{
+    setOpenDialog(false)
+  }
+
+
+
   return (
-    <Box marginLeft={2} marginRight={2}>
+    <Box marginRight={2}>
+      <Box sx={{display:"flex",flexDirection:"row", justifyContent:"space-between"}}>
       <Headeer title="FILES" subtitle="List of Invoices Balances" />
+
+     <Buttonn onClick={()=>{setOpenDialog(true)}}>Create File</Buttonn>
+      </Box>
+     
       <Box
             height="90vh"
             sx={{
@@ -81,6 +94,7 @@ export default function Files() {
             }}>
         <DataGrid checkboxSelection rows={mockDataInvoices} columns={columns} />
       </Box>
+      <CreateNewFile openDialog={openDialog} setOpenDialog={setOpenDialog} handleClose={handleClose} />
     </Box>
   );
 }

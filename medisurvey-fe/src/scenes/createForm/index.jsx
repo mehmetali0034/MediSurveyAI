@@ -10,7 +10,7 @@ import {
   Radio,
   TextField as MuiTextField,
 } from "@mui/material";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { tokens } from "../../theme";
@@ -26,7 +26,17 @@ export default function Index() {
   const [fields, setFields] = useState([]);
 
   // Formik initialValues
-  const initialValues = {formTitle:title,formDescription:description};
+  const initialValues = useMemo(() => {
+    const values = {
+      title: title,
+      description: description,
+    };
+    fields.forEach((field) => {
+      values[field.label] = "";
+    });
+    return values;
+  }, [fields]);
+
   const validationSchemaFields = {};
 
   fields.forEach((field) => {
@@ -41,12 +51,12 @@ export default function Index() {
   const formik = useFormik({
     initialValues,
     validationSchema: Yup.object(validationSchemaFields),
+     // initialValues değişirse formik yeniden başlasın
     onSubmit: (values, { resetForm }) => {
-      console.log("Formik Errors:", formik.errors); // Hata mesajlarını kontrol et
       console.log("Form verisi:", values);
       alert("Form başarıyla gönderildi!");
-      resetForm();
-      setFields([]);
+      resetForm(); // Formu sıfırla
+      setFields([]); // Soruları sıfırla
     },
   });
 
@@ -54,13 +64,18 @@ export default function Index() {
   const handleAddTextQuestion = () => {
     const newField = {
       label: `Text Soru ${fields.length + 1}`,
+      
       type: "text",
       required: true,
       question: "", // Soru metnini tutacak alan
       isEditable: false, // Cevap yazma özelliği kapalı
     };
-    setFields([...fields, newField]);
-    formik.setValues({ ...formik.values, [newField.label]: "" });
+    const updatedFields = [...fields, newField];
+    setFields(updatedFields);
+    formik.setValues({
+      ...formik.values,
+      [newField.label]: "",
+    });
   };
 
   // Çoktan seçmeli soru ekleme
@@ -123,28 +138,49 @@ export default function Index() {
       />
 
       <form onSubmit={formik.handleSubmit}>
-        <Box sx={{mb:3,borderRadius:3}}>
-        <TextField
-          fullWidth
-          variant="outlined"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          InputProps={{
-            style: { fontSize: "25px",  }, // Font büyüklüğünü artır
-          }}
-        />
+        <Box>
 
-        <TextField
-          fullWidth
-          variant="standard"
-          value={description}
-          label="From Description"
-          onChange={(e) => {
-            setDescription(e.target.value);
+     
+        <Box
+          sx={{
+            p: 3,
+            mb: 3,
+            borderRadius: 3,
+            border: `2px solid ${colors.primary[100]}`,
+            borderTop: `4px solid ${colors.redAccent[300]}`,
+            borderLeft: `4px solid ${colors.greenAccent[400]}`,
           }}
-          
-        />
+        >
+          <TextField
+            fullWidth
+            variant="outlined"
+            name="title"
+            value={formik.values.title}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            error={formik.touched.title && Boolean(formik.errors.title)}
+            helperText={formik.touched.title && formik.errors.title}
+            InputProps={{
+              style: { fontSize: "25px" },
+            }}
+          />
+
+          <TextField
+            fullWidth
+            variant="standard"
+            name="description"
+            value={formik.values.description}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            error={
+              formik.touched.description && Boolean(formik.errors.description)
+            }
+            helperText={formik.touched.description && formik.errors.description}
+            label="From Description"
+            sx={{ mt: 1 }}
+          />
         </Box>
+        <Box>
         {fields.map((field, index) => (
           <div key={index} style={{ marginBottom: 20 }}>
             <Typography variant="h6" gutterBottom>
@@ -156,12 +192,14 @@ export default function Index() {
                 boxShadow: 10,
                 border: `2px solid ${colors.primary[100]}`,
                 borderTop: `3px solid`,
+                borderLeft: `4px solid ${colors.greenAccent[400]}`,
               }}
             >
               {/* Soru metni için input */}
               <TextField
                 fullWidth
                 variant="outlined"
+                name={field.label}
                 label="Soru Metnini Girin"
                 sx={{ width: "80%", m: 2 }}
                 value={field.question}
@@ -175,7 +213,6 @@ export default function Index() {
                 <TextField
                   fullWidth
                   variant="outlined"
-                  name={field.label}
                   sx={{ width: "80%", m: 2, mt: 0 }}
                   value={formik.values[field.label]}
                   InputProps={{
@@ -237,8 +274,25 @@ export default function Index() {
               </Box>
             </Box>
           </div>
+          
         ))}
-
+        {fields.length > 0 && (
+              <Button
+                type="submit"
+                variant="contained"
+                color="primary"
+                sx={{
+                  marginBottom: 2,
+                  marginLeft: "auto",
+                  display: "block",
+                  backgroundColor: colors.greenAccent[600],
+                }}
+              >
+                Create
+              </Button>
+            )}
+        </Box>
+ 
         {/* Yeni soru ekleme butonları */}
 
         <Box sx={{ marginTop: 2 }}>
@@ -263,21 +317,7 @@ export default function Index() {
             Çoktan Seçmeli Soru Ekle
           </Button>
         </Box>
-        {fields.length > 0 && (
-          <Button
-            type="submit"
-            variant="contained"
-            color="primary"
-            sx={{
-              marginBottom: 2,
-              marginLeft: "auto",
-              display: "block",
-              backgroundColor: colors.greenAccent[600],
-            }}
-          >
-            Create
-          </Button>
-        )}
+        </Box>
       </form>
     </Box>
   );

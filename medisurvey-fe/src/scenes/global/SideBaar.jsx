@@ -51,7 +51,7 @@ export default function Sidebaar() {
     fetchDoctorInfo();
   }, []);
   return (
-    <Box>
+    <Box sx={{mr:2}}>
       <Sidebar
         rootStyles={{
           [`.${sidebarClasses.container}`]: {

@@ -93,7 +93,7 @@ export default function Team() {
     navigate("/addDoctor");
   };
   return (
-    <Box marginLeft={2} marginRight={2}>
+    <Box  marginRight={2}>
       <Box
         sx={{
           display: "flex",

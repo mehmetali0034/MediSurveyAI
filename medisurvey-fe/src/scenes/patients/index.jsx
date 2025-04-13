@@ -98,7 +98,7 @@ export default function Patients() {
     },
   ];
   return (
-    <Box sx={{ marginLeft:2 , marginRight:2 }} >
+    <Box sx={{ marginRight:2 }} >
       <Box sx={{display:"flex", justifyContent:"space-between",alignItems: "center"}}>
       <Headeer title="PATIENTS" subtitle="List of Contacts for Future Reference"/>
       <Buttonn onClick={clickToAddPatients}>

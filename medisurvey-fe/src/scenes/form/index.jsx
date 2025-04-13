@@ -80,7 +80,7 @@ const booleanValue = !!value; // true (eğer value boş değilse)
   
 
   return (
-    <Box marginLeft={2} marginRight={2}>
+    <Box marginRight={2}>
       <Headeer title="ADD DOCTOR" subtitle="Add a New Doctor Profile" />
       <Formik
         initialValues={initialValues}

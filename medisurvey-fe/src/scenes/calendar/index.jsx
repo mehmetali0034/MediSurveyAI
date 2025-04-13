@@ -38,7 +38,7 @@ export default function Calendar() {
     }
   };
   return (
-    <Box marginLeft={2} marginRight={2}>
+    <Box marginRight={2}>
       <Headeer title="Calendar" subtitle="Full Calendar Intractive Page" />
       <Box display="flex" justifyContent="space-between">
         <Box

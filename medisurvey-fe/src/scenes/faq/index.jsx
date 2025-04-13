@@ -14,7 +14,7 @@ export default function Faq() {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   return (
-    <Box sx={{ marginLeft: 2, marginRight: 2 }}>
+    <Box sx={{ marginRight: 2 }}>
       <Headeer title="FAQ" subtitle="Frequently Asked Questions Page" />
       <Box>
         <Accordion >

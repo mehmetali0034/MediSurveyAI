@@ -57,7 +57,7 @@ return (
         <IconButton>
           <SettingsOutlinedIcon />
         </IconButton>
-        <IconButton>
+        <IconButton onClick={()=>{navigate("/profile")}}>
           <PersonOutlinedIcon />
         </IconButton>
         <IconButton onClick={handleLogout}>

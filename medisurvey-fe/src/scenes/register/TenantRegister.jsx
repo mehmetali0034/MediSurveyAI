@@ -2,6 +2,8 @@ import {
   Alert,
   Box,
   Button,
+  IconButton,
+  InputAdornment,
   Snackbar,
   TextField,
   Typography,
@@ -14,6 +16,7 @@ import * as Yup from "yup";
 import { Formik, Form } from "formik";
 import TenantService from "../../services/tenantService";
 import { useNavigate } from "react-router-dom";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 export default function TenantRegister() {
   const theme = useTheme();
@@ -21,7 +24,8 @@ export default function TenantRegister() {
   const [openSnackBar, setOpenSnackBar] = useState(false);
   const tenantService = new TenantService();
   const navigate = useNavigate();
-
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const initialValues = {
     name: "",
     email: "",
@@ -198,7 +202,7 @@ export default function TenantRegister() {
                   <TextField
                     fullWidth
                     name="password"
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     label="Password"
                     variant="filled"
                     value={values.password}
@@ -206,11 +210,20 @@ export default function TenantRegister() {
                     onBlur={handleBlur}
                     error={touched.password && Boolean(errors.password)}
                     helperText={touched.password && errors.password}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
+                            {showPassword ? <Visibility /> : <VisibilityOff />}
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    }}
                   />
                   <TextField
                     fullWidth
                     name="password_confirmation"
-                    type="password"
+                    type={showConfirmPassword ? "text" : "password"}
                     label="Password Confirmation"
                     variant="filled"
                     value={values.password_confirmation}
@@ -218,6 +231,15 @@ export default function TenantRegister() {
                     onBlur={handleBlur}
                     error={touched.password_confirmation && Boolean(errors.password_confirmation)}
                     helperText={touched.password_confirmation && errors.password_confirmation}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton onClick={() => setShowConfirmPassword(!showConfirmPassword)} edge="end">
+                            {showConfirmPassword ? <Visibility /> : <VisibilityOff />}
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    }}
                   />
                   <Button
                     type="submit"

@@ -107,7 +107,7 @@ export default function AddPatient() {
   };
 
   return (
-    <Box marginLeft={2} marginRight={2}>
+    <Box  marginRight={2}>
       <Headeer title="ADD PATIENTS" subtitle="Add a New Patient Profile" />
       <Formik
         initialValues={initialValues}

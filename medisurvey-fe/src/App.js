@@ -28,6 +28,8 @@ import TenantPatients from "./scenes/tenant-patients"
 import TenantsDoctorProfile from "./scenes/profile/tenantsDoctorProfile"
 import TenantsPatientProfile from "./scenes/profile/TenantsPatientProfile";
 import CreateNewForm from "./scenes/createForm"
+import Profile from "./scenes/profile/doctorProfile"
+
 
 
 
@@ -77,6 +79,8 @@ function App() {
                       <Route path="/AddPatient" element={<AddPatient />} />
                       <Route path="/Create-NewFile" element={<CreateNewFile/>} />
                       <Route path="/Create-NewForm" element={<CreateNewForm/>} />
+                      <Route path="/profile" element={<Profile/>} />
+
                     </Routes>
                   </main>
                 </>
