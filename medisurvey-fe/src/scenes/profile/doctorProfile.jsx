@@ -9,19 +9,20 @@ export default function DoctorProfile() {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const doctorService = new DoctorService();
-  const [doctorInfo, setDoctorInfo] = useState([]);
+  const [doctorInfo, setDoctorInfo] = useState({});
   useEffect(() => {
     const fetchDoctorInfo = async () => {
       try {
-        const response = await doctorService.getDoctorInfo();
+        
+        const response = await doctorService.getDoctorInfo()
         setDoctorInfo(response);
-        console.log("data:", response);
-      } catch {
-        console.log("Bir sorun oluştu");
+      }  catch (error) {
+        console.error("Bir sorun oluştu", error);
+        alert("Bir hata oluştu.");
       }
     };
     fetchDoctorInfo();
-  }, []);
+  },[]);
 
   return (
     <Box>
@@ -37,6 +38,7 @@ export default function DoctorProfile() {
             borderRadius: 3,
             boxShadow: 10,
             backgroundColor: colors.primary[400],
+            
           }}
         >
           <img
@@ -49,6 +51,7 @@ export default function DoctorProfile() {
               borderRadius: "50%",
               marginBottom: "1rem",
               objectFit: "cover",
+              
             }}
           />
           <Box sx={{ display: "flex", flexDirection: "column", width: "80%" }}>
@@ -62,7 +65,7 @@ export default function DoctorProfile() {
             >
               <Typography sx={{ width: "30%" }}>Name :</Typography>
               <TextField
-                value={doctorInfo.doctor.name || ""}
+                value={doctorInfo?.doctor?.name || ""}
                 sx={{ width: "80%", borderRadius: 3 }}
               />
             </Box>
@@ -77,7 +80,7 @@ export default function DoctorProfile() {
             >
               <Typography sx={{ width: "30%" }}>Surname :</Typography>
               <TextField
-                value={doctorInfo.doctor.surname || ""}
+                value={doctorInfo?.doctor?.surname || ""}
                 sx={{ width: "80%", borderRadius: 3 }}
               />
             </Box>
@@ -92,7 +95,7 @@ export default function DoctorProfile() {
             >
               <Typography sx={{ width: "30%" }}>Email :</Typography>
               <TextField
-                value={doctorInfo.doctor.email || ""}
+                value={doctorInfo?.doctor?.email || ""}
                 sx={{ width: "80%", borderRadius: 3 }}
               />
             </Box>
@@ -107,7 +110,7 @@ export default function DoctorProfile() {
             >
               <Typography sx={{ width: "30%" }}>Phone Number :</Typography>
               <TextField
-                value={doctorInfo.doctor.phone_number || ""}
+                value={doctorInfo?.doctor?.phone_number || ""}
                 sx={{ width: "80%", borderRadius: 3 }}
               />
             </Box>
@@ -122,7 +125,7 @@ export default function DoctorProfile() {
             >
               <Typography sx={{ width: "30%" }}>Specialization :</Typography>
               <TextField
-                value={doctorInfo.doctor.specialization || ""}
+                value={doctorInfo?.doctor?.specialization || ""}
                 sx={{ width: "80%", borderRadius: 3 }}
               />
             </Box>
@@ -137,7 +140,22 @@ export default function DoctorProfile() {
             >
               <Typography sx={{ width: "30%" }}>Role :</Typography>
               <TextField
-                value={doctorInfo.doctor.role || ""}
+                value={doctorInfo?.doctor?.role || ""}
+                sx={{ width: "80%", borderRadius: 3,onFocus:false }}
+              />
+            </Box>
+
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
+                mb: 1,
+              }}
+            >
+              <Typography sx={{ width: "30%" }}>Numberof Sub Doctors  :</Typography>
+              <TextField
+                value={doctorInfo?.subDoctors?.length || "Loading..."}
                 sx={{ width: "80%", borderRadius: 3,onFocus:false }}
               />
             </Box>

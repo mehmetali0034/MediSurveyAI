@@ -14,7 +14,8 @@ export default class DoctorService {
       const response = await axiosInstance.get(
         `http://localhost:3000/api/doctors/${doctorId}` 
       ); debugger ;
-      return response.data ; 
+      console.log("asdasd",response.data)
+      return response.data ;
     } catch (error) {
       console.error("Error fetching doctor info:", error.message);
       alert("Failed to fetch doctor info.");

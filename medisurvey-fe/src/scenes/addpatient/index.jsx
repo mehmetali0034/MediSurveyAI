@@ -19,7 +19,7 @@ import useMediaQuery from "@mui/material/useMediaQuery";
 import PhoneInput from "react-phone-number-input";
 import "react-phone-number-input/style.css";
 import Headeer from "../../components/Headeer";
-import PatientService from "../../services/patientService";
+import PatientService from "../../services/doctorServices/patientService";
 
 export default function AddPatient() {
   const theme = useTheme();

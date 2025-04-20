@@ -97,6 +97,13 @@ export default function Patients() {
       flex:1
     },
   ];
+
+  const handleCellClick =(params)=>{
+    if(params.field === "firstName"){
+      navigate(`/patients/${params.id}`)
+    }
+
+  }
   return (
     <Box sx={{ marginRight:2 }} >
       <Box sx={{display:"flex", justifyContent:"space-between",alignItems: "center"}}>
@@ -138,7 +145,7 @@ export default function Patients() {
         },
 
       }}>
-        <DataGrid checkboxSelection rows={patients}
+        <DataGrid onCellClick={handleCellClick} checkboxSelection rows={patients}
         columns={columns} components={{ Toolbar: GridToolbar }} />
       </Box>
     </Box>

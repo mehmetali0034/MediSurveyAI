@@ -29,8 +29,8 @@ import TenantsDoctorProfile from "./scenes/profile/tenantsDoctorProfile"
 import TenantsPatientProfile from "./scenes/profile/TenantsPatientProfile";
 import CreateNewForm from "./scenes/createForm"
 import Profile from "./scenes/profile/doctorProfile"
-
-
+import File from "./scenes/file/File"
+import PatientProfile from "./scenes/profile/PatientProfile";
 
 
 
@@ -78,9 +78,10 @@ function App() {
                       <Route path="/pie" element={<Pie />} />
                       <Route path="/AddPatient" element={<AddPatient />} />
                       <Route path="/Create-NewFile" element={<CreateNewFile/>} />
-                      <Route path="/Create-NewForm" element={<CreateNewForm/>} />
+                      <Route path="/Create-NewForm/:id" element={<CreateNewForm/>} />
                       <Route path="/profile" element={<Profile/>} />
-
+                      <Route path="/files/:id" element={<File/>} />
+                      <Route path="/patients/:id" element={<PatientProfile/>} />
                     </Routes>
                   </main>
                 </>

@@ -10,313 +10,247 @@ import {
   Radio,
   TextField as MuiTextField,
 } from "@mui/material";
-import React, { useMemo, useState } from "react";
-import { useFormik } from "formik";
-import * as Yup from "yup";
+import React, { useState } from "react";
 import { tokens } from "../../theme";
 import Headeer from "../../components/Headeer";
+import { useParams } from "react-router-dom";
+import FormService from "../../services/doctorServices/FormService";
 
 export default function Index() {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+  const { id } = useParams();
+  const formService = new FormService();
 
-  // Soruları saklayacak state
-  const [title, setTitle] = useState("Başlıksız Form");
+  const [title, setTitle] = useState("Untitled Form");
   const [description, setDescription] = useState("");
   const [fields, setFields] = useState([]);
+  const [forPatients, setForPatients] = useState("");
 
-  // Formik initialValues
-  const initialValues = useMemo(() => {
-    const values = {
-      title: title,
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    const data = {
+      name: title,
       description: description,
+      questions: fields.map((field) => {
+        const questionData = {
+          question: field.question,
+          type: field.type,
+        };
+        if (field.type === "multiple_choice") {
+          questionData.options = field.options;
+        }
+        return questionData;
+      }),
+      level: 10,
+      type: forPatients,
+      file_id: id,
     };
-    fields.forEach((field) => {
-      values[field.label] = "";
-    });
-    return values;
-  }, [fields]);
 
-  const validationSchemaFields = {};
+    const handleCreateForm = async (data) => {
+      try {
+        const response = await formService.createForm(data);
+        console.log("Form başarıyla oluşturuldu:", response);
+        alert("Form başarıyla gönderildi!");
+        setTitle("Untitled Form"); 
+        setDescription("");
+        setFields([]);
+      } catch (err) {
+        console.error("Form oluşturulurken hata:", err);
+        alert("Form oluşturulurken bir hata oluştu!");
+      }
 
-  fields.forEach((field) => {
-    initialValues[field.label] = "";
-    // Metin soruları için validation yapılmasın
-    if (field.type !== "text" && field.required) {
-      validationSchemaFields[field.label] =
-        Yup.string().required("Zorunlu alan");
-    }
-  });
+    };
+    handleCreateForm(data);debugger
+  };
 
-  const formik = useFormik({
-    initialValues,
-    validationSchema: Yup.object(validationSchemaFields),
-     // initialValues değişirse formik yeniden başlasın
-    onSubmit: (values, { resetForm }) => {
-      console.log("Form verisi:", values);
-      alert("Form başarıyla gönderildi!");
-      resetForm(); // Formu sıfırla
-      setFields([]); // Soruları sıfırla
-    },
-  });
-
-  // Metin sorusu ekleme
   const handleAddTextQuestion = () => {
     const newField = {
-      label: `Text Soru ${fields.length + 1}`,
-      
       type: "text",
-      required: true,
-      question: "", // Soru metnini tutacak alan
-      isEditable: false, // Cevap yazma özelliği kapalı
-    };
-    const updatedFields = [...fields, newField];
-    setFields(updatedFields);
-    formik.setValues({
-      ...formik.values,
-      [newField.label]: "",
-    });
-  };
-
-  // Çoktan seçmeli soru ekleme
-  const handleAddMultipleChoiceQuestion = () => {
-    const newField = {
-      label: `Çoktan Seçmeli Soru ${fields.length + 1}`,
-      type: "multiple_choice",
-      options: ["Seçenek 1", "Seçenek 2", "Seçenek 3"], // Başlangıçta 3 seçenek
-      required: true,
-      question: "", // Soru metnini tutacak alan
-      isEditable: true, // Cevap yazılabilir
+      question: "",
     };
     setFields([...fields, newField]);
-    formik.setValues({ ...formik.values, [newField.label]: "" });
   };
 
-  // Seçenek ekleme
-  const handleAddOption = (fieldLabel) => {
-    const updatedFields = fields.map((field) =>
-      field.label === fieldLabel
-        ? { ...field, options: [...field.options, ""] } // Yeni bir boş seçenek ekliyoruz
-        : field
-    );
+  const handleAddMultipleChoiceQuestion = () => {
+    const newField = {
+      type: "multiple_choice",
+      options: ["Seçenek 1", "Seçenek 2", "Seçenek 3"],
+      question: "",
+    };
+    setFields([...fields, newField]);
+  };
+
+  const handleQuestionChange = (index, value) => {
+    const updatedFields = [...fields];
+    updatedFields[index].question = value;
     setFields(updatedFields);
   };
 
-  // Seçeneği güncelleme
-  const handleOptionChange = (fieldLabel, index, value) => {
-    const updatedFields = fields.map((field) =>
-      field.label === fieldLabel
-        ? {
-            ...field,
-            options: field.options.map((option, i) =>
-              i === index ? value : option
-            ),
-          }
-        : field
-    );
+  const handleAddOption = (index) => {
+    const updatedFields = [...fields];
+    updatedFields[index].options.push("");
     setFields(updatedFields);
   };
 
-  // Soru metnini değiştirme
-  const handleQuestionChange = (fieldLabel, value) => {
-    const updatedFields = fields.map((field) =>
-      field.label === fieldLabel
-        ? {
-            ...field,
-            question: value, // Soru metnini güncelle
-          }
-        : field
-    );
+  const handleOptionChange = (fieldIndex, optionIndex, value) => {
+    const updatedFields = [...fields];
+    updatedFields[fieldIndex].options[optionIndex] = value;
     setFields(updatedFields);
+  };
+
+  const handleButtonClick = (type) => {
+    setForPatients(type === "sendToPatient" ? "for patients" : "for me");
   };
 
   return (
     <Box sx={{ padding: 4 }}>
-      <Headeer
-        title={"Create Form"}
-        subtitle={"Create Form To Send Patients"}
-      />
+      <Headeer title={"Create Form"} subtitle={"Create Form For Patients"} />
 
-      <form onSubmit={formik.handleSubmit}>
+      <form onSubmit={handleSubmit}>
         <Box>
-
-     
-        <Box
-          sx={{
-            p: 3,
-            mb: 3,
-            borderRadius: 3,
-            border: `2px solid ${colors.primary[100]}`,
-            borderTop: `4px solid ${colors.redAccent[300]}`,
-            borderLeft: `4px solid ${colors.greenAccent[400]}`,
-          }}
-        >
-          <TextField
-            fullWidth
-            variant="outlined"
-            name="title"
-            value={formik.values.title}
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-            error={formik.touched.title && Boolean(formik.errors.title)}
-            helperText={formik.touched.title && formik.errors.title}
-            InputProps={{
-              style: { fontSize: "25px" },
+          <Box
+            sx={{
+              p: 3,
+              mb: 3,
+              borderRadius: 3,
+              border: `2px solid ${colors.primary[100]}`,
+              borderTop: `4px solid ${colors.redAccent[300]}`,
+              borderLeft: `4px solid ${colors.greenAccent[400]}`,
             }}
-          />
-
-          <TextField
-            fullWidth
-            variant="standard"
-            name="description"
-            value={formik.values.description}
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-            error={
-              formik.touched.description && Boolean(formik.errors.description)
-            }
-            helperText={formik.touched.description && formik.errors.description}
-            label="From Description"
-            sx={{ mt: 1 }}
-          />
-        </Box>
-        <Box>
-        {fields.map((field, index) => (
-          <div key={index} style={{ marginBottom: 20 }}>
-            <Typography variant="h6" gutterBottom>
-              {field.label}
-            </Typography>
-            <Box
-              sx={{
-                borderRadius: 5,
-                boxShadow: 10,
-                border: `2px solid ${colors.primary[100]}`,
-                borderTop: `3px solid`,
-                borderLeft: `4px solid ${colors.greenAccent[400]}`,
+          >
+            <TextField
+              fullWidth
+              variant="outlined"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              InputProps={{
+                style: { fontSize: "25px" },
               }}
-            >
-              {/* Soru metni için input */}
-              <TextField
-                fullWidth
-                variant="outlined"
-                name={field.label}
-                label="Soru Metnini Girin"
-                sx={{ width: "80%", m: 2 }}
-                value={field.question}
-                onChange={(e) =>
-                  handleQuestionChange(field.label, e.target.value)
-                }
-                margin="normal"
-              />
+            />
+            <TextField
+              fullWidth
+              variant="standard"
+              label="Form Description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              sx={{ mt: 1 }}
+            />
+          </Box>
 
-              {field.type === "text" && (
-                <TextField
-                  fullWidth
-                  variant="outlined"
-                  sx={{ width: "80%", m: 2, mt: 0 }}
-                  value={formik.values[field.label]}
-                  InputProps={{
-                    readOnly: !field.isEditable, // Eğer isEditable false ise input alanı readonly olur
+          <Box>
+            {fields.map((field, index) => (
+              <Box key={index} sx={{ marginBottom: 3 }}>
+                <Typography variant="h6" gutterBottom>
+                  Soru {index + 1}
+                </Typography>
+
+                <Box
+                  sx={{
+                    borderRadius: 5,
+                    boxShadow: 10,
+                    border: `2px solid ${colors.primary[100]}`,
+                    borderTop: `3px solid`,
+                    borderLeft: `4px solid ${colors.greenAccent[400]}`,
                   }}
-                  onBlur={formik.handleBlur}
-                  error={
-                    formik.touched[field.label] &&
-                    Boolean(formik.errors[field.label])
-                  }
-                  helperText={
-                    formik.touched[field.label] && formik.errors[field.label]
-                  }
-                  placeholder="Cevap yazın"
-                />
-              )}
+                >
+                  <TextField
+                    fullWidth
+                    variant="outlined"
+                    label="Soru Metnini Girin"
+                    sx={{ width: "80%", m: 2 }}
+                    value={field.question}
+                    onChange={(e) => handleQuestionChange(index, e.target.value)}
+                  />
 
-              <Box sx={{ margin: 3 }}>
-                {field.type === "multiple_choice" && (
-                  <FormControl component="fieldset" fullWidth>
-                    <RadioGroup
-                      name={field.label}
-                      value={formik.values[field.label]}
-                      onChange={formik.handleChange}
-                    >
-                      {field.options.map((option, idx) => (
-                        <FormControlLabel
-                          key={idx}
-                          value={option}
-                          control={<Radio disabled />}
-                          label={
-                            <MuiTextField
+                  {field.type === "multiple_choice" && (
+                    <Box sx={{ margin: 3 }}>
+                      <FormControl fullWidth>
+                        <RadioGroup>
+                          {field.options.map((option, optionIdx) => (
+                            <FormControlLabel
+                              key={optionIdx}
                               value={option}
-                              onChange={(e) =>
-                                handleOptionChange(
-                                  field.label,
-                                  idx,
-                                  e.target.value
-                                )
+                              control={<Radio disabled />}
+                              label={
+                                <MuiTextField
+                                  value={option}
+                                  onChange={(e) =>
+                                    handleOptionChange(index, optionIdx, e.target.value)
+                                  }
+                                  label={`Seçenek ${optionIdx + 1}`}
+                                  variant="outlined"
+                                  fullWidth
+                                />
                               }
-                              label={`Seçenek ${idx + 1}`}
-                              variant="outlined"
-                              fullWidth
                             />
-                          }
-                        />
-                      ))}
-                    </RadioGroup>
-                    <Button
-                      sx={{ mt: 2 }}
-                      variant="outlined"
-                      color="secondary"
-                      onClick={() => handleAddOption(field.label)}
-                    >
-                      Seçenek Ekle
-                    </Button>
-                  </FormControl>
-                )}
+                          ))}
+                        </RadioGroup>
+
+                        <Button
+                          sx={{ mt: 2 }}
+                          variant="outlined"
+                          color="secondary"
+                          onClick={() => handleAddOption(index)}
+                        >
+                          Seçenek Ekle
+                        </Button>
+                      </FormControl>
+                    </Box>
+                  )}
+                </Box>
               </Box>
-            </Box>
-          </div>
-          
-        ))}
-        {fields.length > 0 && (
-              <Button
-                type="submit"
-                variant="contained"
-                color="primary"
+            ))}
+
+            {fields.length > 0 && (
+              <Box
                 sx={{
-                  marginBottom: 2,
-                  marginLeft: "auto",
-                  display: "block",
-                  backgroundColor: colors.greenAccent[600],
+                  display: "flex",
+                  flexDirection: "row",
+                  justifyContent: "flex-end",
                 }}
               >
-                Create
-              </Button>
+                <Button
+                  type="submit"
+                  variant="contained"
+                  color="primary"
+                  sx={{ m: 1, backgroundColor: colors.greenAccent[600] }}
+                  onClick={() => handleButtonClick("sendToPatient")}
+                >
+                  Create to Send Patient
+                </Button>
+                <Button
+                  type="submit"
+                  variant="contained"
+                  color="primary"
+                  sx={{ m: 1, backgroundColor: colors.greenAccent[600] }}
+                  onClick={() => handleButtonClick("fillYourself")}
+                >
+                  Create to Fill Yourself
+                </Button>
+              </Box>
             )}
-        </Box>
- 
-        {/* Yeni soru ekleme butonları */}
+          </Box>
 
-        <Box sx={{ marginTop: 2 }}>
-          <Button
-            variant="outlined"
-            color="secondary"
-            onClick={handleAddTextQuestion}
-            sx={{
-              marginRight: 2,
-              backgroundColor: colors.blueAccent[600],
-              color: "white",
-            }}
-          >
-            Metin Sorusu Ekle
-          </Button>
-          <Button
-            variant="outlined"
-            color="secondary"
-            onClick={handleAddMultipleChoiceQuestion}
-            sx={{ backgroundColor: colors.blueAccent[600], color: "white" }}
-          >
-            Çoktan Seçmeli Soru Ekle
-          </Button>
-        </Box>
+          <Box sx={{ marginTop: 2 }}>
+            <Button
+              variant="outlined"
+              color="secondary"
+              onClick={handleAddTextQuestion}
+              sx={{ marginRight: 2, backgroundColor: colors.blueAccent[600], color: "white" }}
+            >
+              Metin Sorusu Ekle
+            </Button>
+            <Button
+              variant="outlined"
+              color="secondary"
+              onClick={handleAddMultipleChoiceQuestion}
+              sx={{ backgroundColor: colors.blueAccent[600], color: "white" }}
+            >
+              Çoktan Seçmeli Soru Ekle
+            </Button>
+          </Box>
         </Box>
       </form>
     </Box>

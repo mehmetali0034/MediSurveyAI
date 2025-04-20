@@ -9,15 +9,30 @@ import {
 } from "@mui/material";
 import React, { useState } from "react";
 import { tokens } from "../theme";
+import FileService from "../services/doctorServices/FileService";
 
 export default function CreateNewFile(props) {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+  const fileService = new FileService();
   const { openDialog, setOpenDialog, handleClose } = props;
-  const [name, setName] = useState("");
+  const [name, setName] = useState("");debugger;
+  
 
-  const handleClick = () => {
-    console.log("selam");
+  
+  const handleClick = async() => {
+    const data = {
+      "name":name
+    }
+    try{
+      const response = await fileService.createFile(data);
+      console.log(response)
+      setName("")
+      setOpenDialog(false)
+    }catch(error){
+      console.log("Bir hata oluştu.")
+    }
+   
   };
 
   return (
