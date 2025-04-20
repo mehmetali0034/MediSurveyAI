@@ -20,13 +20,15 @@ import PhoneInput from "react-phone-number-input";
 import "react-phone-number-input/style.css";
 import Headeer from "../../components/Headeer";
 import PatientService from "../../services/doctorServices/patientService";
+import FileService from "../../services/doctorServices/FileService";
 
 export default function AddPatient() {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const isNonMobile = useMediaQuery("(min-width:600px)");
   const [openSnackBar, setOpenSnackBar] = useState(false);
-
+  const [files, setFiles] = useState([]);
+  const fileService = new FileService();
   const handleCloseSnackBar = () => {
     setOpenSnackBar(false);
   };
@@ -65,6 +67,11 @@ export default function AddPatient() {
   const patientService = new PatientService();
 
   const clickToAddPatient = (values, { resetForm, setSubmitting }) => {
+
+    const selectedFile = files.find((f) => f.name === values.file); 
+    const fileId = selectedFile ? selectedFile.id : null;
+    console.log("File ID",fileId)
+    console.log("Selected File",selectedFile)
     const patientData = {
       firstName: values.firstName,
       lastName: values.lastName,
@@ -72,9 +79,9 @@ export default function AddPatient() {
       gender: values.gender,
       primaryPhone: values.phoneOne,
       secondaryPhone: values.phoneTwo,
-      file: values.file,
+      fileId: fileId,
       dateOfBirth: values.dateOfBirth,
-    };
+    };debugger;
 
     const token = localStorage.getItem("token");
 
@@ -87,8 +94,8 @@ export default function AddPatient() {
       .addPatient(patientData, token)
       .then((response) => {
         setOpenSnackBar(true);
-        console.log("Patient successfully registered:", response.data);
-        resetForm(); // formu sıfırlıyoruz
+        console.log("Patient successfully registered:", response.data); debugger;
+        resetForm(); // formu sıfırlıyoruz 
       })
       .catch((error) => {
         console.error(
@@ -106,8 +113,20 @@ export default function AddPatient() {
       });
   };
 
+  useState(() => {
+    const fetchAllPatients = async () => {
+      try {
+        const response = await fileService.getAllFiles();
+        console.log("Files getirildi: ", response);
+        setFiles(response); debugger
+      } catch (err) {
+        console.error("Sorun oluştu:", err);
+      }
+    };
+    fetchAllPatients();
+  });
   return (
-    <Box  marginRight={2}>
+    <Box marginRight={2}>
       <Headeer title="ADD PATIENTS" subtitle="Add a New Patient Profile" />
       <Formik
         initialValues={initialValues}
@@ -216,6 +235,7 @@ export default function AddPatient() {
                 sx={{ gridColumn: "span 1" }}
               >
                 <InputLabel>File</InputLabel>
+
                 <Select
                   name="file"
                   value={values.file}
@@ -223,10 +243,11 @@ export default function AddPatient() {
                   onChange={handleChange}
                   error={Boolean(touched.file && errors.file)}
                 >
-                  <MenuItem value="Tendon Yırtılması">
-                    Tendon Yırtılması
-                  </MenuItem>
-                  <MenuItem value="Ön Çarpraz Bağ">Ön Çarpraz Bağ</MenuItem>
+                  {files.map((file, index) => (
+                    <MenuItem key={index} value={file?.name ||  " "}>
+                      {file?.name ||  " "}
+                    </MenuItem> 
+                  ))}
                 </Select>
                 {touched.file && errors.file && (
                   <Box sx={{ color: colors.redAccent[500] }}>{errors.file}</Box>

@@ -1,8 +1,8 @@
 import { useTheme } from "@emotion/react";
 import React, { useEffect, useState } from "react";
 import { tokens } from "../../theme";
-import { useParams } from "react-router-dom";
-import { Box, TextField, Typography } from "@mui/material";
+import { useNavigate, useParams } from "react-router-dom";
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Typography } from "@mui/material";
 import PatientService from "../../services/doctorServices/patientService";
 import Headeer from "../../components/Headeer";
 
@@ -12,8 +12,10 @@ export default function PatientProfile() {
   const { id } = useParams();
   const patientService = new PatientService();
   const [patientInfo, setPatientInfo] = useState([]);
-
+  const [dialogState, setDialogState] = useState(false)
+  const navigate = useNavigate();
   useEffect(() => {
+   
     const fetchPatientInfo = async () => {
       try {
         const response = await patientService.getPatientInfo(id);
@@ -26,13 +28,24 @@ export default function PatientProfile() {
     };
     fetchPatientInfo();
   }, []);
+
+  const handleDeletePatient = async()=>{
+    try{
+      const response = await patientService.deletePatient(id)
+      console.log("Patient Deleted: " ,response.data)
+      navigate("/patients")
+    }catch(error){
+      console.error("Hasta Silinirken hata oluştu: ",error)
+    }
+
+  }
   return (
     <Box>
       <Headeer
         title={"Patient Informaiton"}
         subtitle={"Display Patient Information"}
       />
-      <Box sx={{ display: "flex", justifyContent: "center" }}>
+      <Box sx={{ display: "flex",flexDirection:"column", alignItems:"center" }}>
         <Box
           sx={{
             display: "flex",
@@ -111,8 +124,40 @@ export default function PatientProfile() {
               }
             />
           </Box>
+          <Box
+            sx={{ display: "flex", flexDirection: "row", alignItems: "center" }}
+          >
+            <Typography sx={{ width: "30%" }}>Files: </Typography>
+            <TextField sx={{width:"80%"}} value={patientInfo?.patient?.File?.name || ""
+
+            } /> 
+          </Box>
           </Box>
         </Box>
+        <Box sx={{display:"flex", flexDirection:"row", justifyContent:"flex-end",width: "95%",m:2,mt:5}}>
+          <Button onClick={()=>{setDialogState(true)}} sx={{backgroundColor:colors.redAccent[500]}}>
+            Delete Patient
+          </Button>
+        </Box>
+        <Dialog  open={dialogState} onClose={()=>{setDialogState(false)}}>
+          <DialogTitle sx={{ backgroundColor: colors.grey[500],fontSize: "1.2rem",fontWeight: "bold"}}>Do You Want To Delete Patient</DialogTitle>
+          <DialogContent sx={{ backgroundColor: colors.primary[400]}}>
+            <Box sx={{mt:2}}>
+            If you click yes you will not be able to undo this action.
+            </Box>
+          
+          </DialogContent >
+          
+          <DialogActions>
+           
+            <Button onClick={()=>{setDialogState(false)}} sx={{backgroundColor:colors.primary[200],color:"white"}}> 
+              No
+            </Button>
+            <Button onClick={handleDeletePatient} sx={{backgroundColor:colors.greenAccent[400],}}> 
+              Yes
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Box>
     </Box>
   );

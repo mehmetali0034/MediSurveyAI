@@ -13,7 +13,6 @@ export default function DoctorProfile() {
   useEffect(() => {
     const fetchDoctorInfo = async () => {
       try {
-        
         const response = await doctorService.getDoctorInfo()
         setDoctorInfo(response);
       }  catch (error) {

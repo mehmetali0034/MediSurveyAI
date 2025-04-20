@@ -29,4 +29,13 @@ export default class PatientService {
         throw error;
     }
   }
+  deletePatient = async (data)=>{
+    try{
+      const response = await axiosInstance.delete(`http://localhost:3000/api/patients/${data}`)
+      return response.data
+    }catch(error){
+      console.log("Bir sorun oluştu:", error?.response?.data || error.message)
+      throw error;
+    }
+  }
 }
