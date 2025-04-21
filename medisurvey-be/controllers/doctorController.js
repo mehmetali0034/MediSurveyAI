@@ -12,33 +12,28 @@ const getAllDoctorsByTenant = async (req, res) => {
     }
 
     const decoded = jwt.verify(token, 'secretkey');
-    // Sadece tenant token'ı ile işlem yapılabilir
     if (decoded.role) {
       return res.status(403).json({ error: 'Bu işlem sadece tenant tarafından yapılabilir!' });
     }
 
     const tenantId = decoded.id;
 
-    // Önce tenant'ı kontrol edelim
     const tenant = await Tenant.findByPk(tenantId);
     if (!tenant) {
       return res.status(404).json({ error: 'Tenant bulunamadı.' });
     }
 
-    // Önce bu tenant'a ait admin doktorları bulalım
     const adminDoctors = await Doctor.findAll({
       where: { 
         tenant_id: tenantId,
         role: 'admin',
-        created_by: null // Tenant tarafından oluşturulan adminler
+        created_by: null 
       },
       attributes: ['id', 'name', 'surname', 'email', 'role', 'specialization', 'phone_number', 'tenant_id', 'created_by']
     });
 
-    // Admin doktorların ID'lerini alalım
     const adminIds = adminDoctors.map(admin => admin.id);
 
-    // Bu admin doktorların eklediği normal doktorları bulalım
     const normalDoctors = await Doctor.findAll({
       where: {
         created_by: {
@@ -49,7 +44,6 @@ const getAllDoctorsByTenant = async (req, res) => {
       attributes: ['id', 'name', 'surname', 'email', 'role', 'specialization', 'phone_number', 'tenant_id', 'created_by']
     });
 
-    // Sonuçları düzenli bir şekilde yapılandıralım
     const result = {
       tenant: {
         id: tenant.id,
@@ -119,7 +113,6 @@ const getDoctorInfo = async (req, res) => {
     const decoded = jwt.verify(token, 'secretkey');
     const jwtDoctorId = decoded.id;
 
-    // Önce isteği yapan doktoru bulalım
     const requestingDoctor = await Doctor.findByPk(jwtDoctorId);
     if (!requestingDoctor) {
       return res.status(404).json({ error: 'Kullanıcı bulunamadı.' });
@@ -127,7 +120,6 @@ const getDoctorInfo = async (req, res) => {
 
     const doctorId = req.params.doctorId;
 
-    // İstenen doktoru bulalım
     const doctor = await Doctor.findOne({ 
       where: { id: doctorId },
       attributes: ['id', 'name', 'surname', 'email', 'role', 'specialization', 'phone_number', 'tenant_id', 'created_by']
@@ -137,16 +129,12 @@ const getDoctorInfo = async (req, res) => {
       return res.status(404).json({ error: 'Doktor bulunamadı.' });
     }
 
-    // Yetki kontrolü
     if (requestingDoctor.role === 'admin') {
-      // Admin kendi bilgilerine ve kendi oluşturduğu doktorların bilgilerine erişebilir
       if (doctorId !== jwtDoctorId && doctor.created_by !== jwtDoctorId) {
         return res.status(403).json({ error: 'Bu doktor bilgilerine erişim yetkiniz yok.' });
       }
 
-      // Eğer alt doktor bilgisi isteniyorsa, o doktorun alt doktorlarını da getirelim
       if (doctorId === jwtDoctorId) {
-        // Admin kendi bilgilerini istiyorsa, kendi oluşturduğu doktorları da getirelim
         const subDoctors = await Doctor.findAll({
           where: { created_by: jwtDoctorId },
           attributes: ['id', 'name', 'surname', 'email', 'role', 'specialization', 'phone_number', 'tenant_id', 'created_by']
@@ -158,7 +146,6 @@ const getDoctorInfo = async (req, res) => {
         });
       }
     } else {
-      // Normal doktor sadece kendi bilgilerine erişebilir
       if (doctorId !== jwtDoctorId) {
         return res.status(403).json({ error: 'Sadece kendi bilgilerinize erişebilirsiniz.' });
       }
@@ -179,7 +166,6 @@ const getDoctorInfoByTenant = async (req, res) => {
     }
 
     const decoded = jwt.verify(token, 'secretkey');
-    // Sadece tenant token'ı ile işlem yapılabilir
     if (decoded.role) {
       return res.status(403).json({ error: 'Bu işlem sadece tenant tarafından yapılabilir!' });
     }
@@ -187,33 +173,29 @@ const getDoctorInfoByTenant = async (req, res) => {
     const tenantId = decoded.id;
     const doctorId = req.params.doctorId;
 
-    // Önce tenant'ı kontrol edelim
     const tenant = await Tenant.findByPk(tenantId);
     if (!tenant) {
       return res.status(404).json({ error: 'Tenant bulunamadı.' });
     }
 
-    // Önce bu tenant'a ait admin doktorları bulalım
     const adminDoctors = await Doctor.findAll({
       where: { 
         tenant_id: tenantId,
         role: 'admin',
-        created_by: null // Tenant tarafından oluşturulan adminler
+        created_by: null 
       },
       attributes: ['id']
     });
 
-    // Admin doktorların ID'lerini alalım
     const adminIds = adminDoctors.map(admin => admin.id);
 
-    // İstenen doktoru bulalım
     const doctor = await Doctor.findOne({
       where: { 
         id: doctorId,
         [Op.or]: [
-          { id: { [Op.in]: adminIds } }, // Admin doktorlar
+          { id: { [Op.in]: adminIds } }, 
           { 
-            created_by: { [Op.in]: adminIds }, // Admin doktorların oluşturduğu doktorlar
+            created_by: { [Op.in]: adminIds }, 
             tenant_id: tenantId
           }
         ]
@@ -241,50 +223,40 @@ const updateDoctor = async (req, res) => {
     const doctorId = req.params.doctorId;
     const { name, surname, specialization, phone_number, oldPassword, newPassword, confirmNewPassword } = req.body;
 
-    // Önce isteği yapan doktoru bulalım
     const requestingDoctor = await Doctor.findByPk(jwtDoctorId);
     if (!requestingDoctor) {
       return res.status(404).json({ error: 'Kullanıcı bulunamadı.' });
     }
 
-    // Güncellenecek doktoru bulalım
     const doctorToUpdate = await Doctor.findOne({ where: { id: doctorId } });
     if (!doctorToUpdate) {
       return res.status(404).json({ error: 'Doktor bulunamadı.' });
     }
 
-    // Yetki kontrolü
     if (requestingDoctor.role === 'admin') {
-      // Admin doktor, kendisini veya kendi oluşturduğu doktorları güncelleyebilir
       if (doctorId !== jwtDoctorId && doctorToUpdate.created_by !== jwtDoctorId) {
         return res.status(403).json({ error: 'Bu doktoru güncelleme yetkiniz yok.' });
       }
     } else {
-      // Normal doktor sadece kendisini güncelleyebilir
       if (doctorId !== jwtDoctorId) {
         return res.status(403).json({ error: 'Sadece kendi bilgilerinizi güncelleyebilirsiniz.' });
       }
     }
 
-    // Şifre değiştirme işlemi varsa
     if (oldPassword || newPassword || confirmNewPassword) {
-      // Tüm şifre alanları zorunlu
       if (!oldPassword || !newPassword || !confirmNewPassword) {
         return res.status(400).json({ error: 'Şifre değiştirmek için eski şifre, yeni şifre ve yeni şifre tekrarı gereklidir.' });
       }
 
-      // Yeni şifrelerin eşleşme kontrolü
       if (newPassword !== confirmNewPassword) {
         return res.status(400).json({ error: 'Yeni şifreler eşleşmiyor.' });
       }
 
-      // Eski şifre kontrolü
       const isOldPasswordValid = await bcrypt.compare(oldPassword, doctorToUpdate.password);
       if (!isOldPasswordValid) {
         return res.status(400).json({ error: 'Eski şifre yanlış.' });
       }
 
-      // Yeni şifreyi hashle
       const hashedNewPassword = await bcrypt.hash(newPassword, 10);
       doctorToUpdate.password = hashedNewPassword;
     }
@@ -296,7 +268,6 @@ const updateDoctor = async (req, res) => {
 
     await doctorToUpdate.save();
 
-    // Şifreyi response'dan çıkar
     const doctorResponse = {
       id: doctorToUpdate.id,
       name: doctorToUpdate.name,
@@ -327,7 +298,6 @@ const updateDoctorByTenant = async (req, res) => {
     }
 
     const decoded = jwt.verify(token, 'secretkey');
-    // Sadece tenant token'ı ile işlem yapılabilir
     if (decoded.role) {
       return res.status(403).json({ error: 'Bu işlem sadece tenant tarafından yapılabilir!' });
     }
@@ -336,33 +306,32 @@ const updateDoctorByTenant = async (req, res) => {
     const doctorId = req.params.doctorId;
     const { name, surname, specialization, phone_number, oldPassword, newPassword, confirmNewPassword } = req.body;
 
-    // Önce tenant'ı kontrol edelim
+
     const tenant = await Tenant.findByPk(tenantId);
     if (!tenant) {
       return res.status(404).json({ error: 'Tenant bulunamadı.' });
     }
 
-    // Önce bu tenant'a ait admin doktorları bulalım
     const adminDoctors = await Doctor.findAll({
       where: { 
         tenant_id: tenantId,
         role: 'admin',
-        created_by: null // Tenant tarafından oluşturulan adminler
+        created_by: null 
       },
       attributes: ['id']
     });
 
-    // Admin doktorların ID'lerini alalım
+
     const adminIds = adminDoctors.map(admin => admin.id);
 
-    // Güncellenecek doktoru bulalım
+
     const doctorToUpdate = await Doctor.findOne({
       where: { 
         id: doctorId,
         [Op.or]: [
-          { id: { [Op.in]: adminIds } }, // Admin doktorlar
+          { id: { [Op.in]: adminIds } }, 
           { 
-            created_by: { [Op.in]: adminIds }, // Admin doktorların oluşturduğu doktorlar
+            created_by: { [Op.in]: adminIds },
             tenant_id: tenantId
           }
         ]
@@ -373,30 +342,30 @@ const updateDoctorByTenant = async (req, res) => {
       return res.status(404).json({ error: 'Doktor bulunamadı veya bu doktora erişim yetkiniz yok.' });
     }
 
-    // Doktor admin mi kontrol edelim
+
     if (doctorToUpdate.role === 'admin' && doctorToUpdate.created_by !== null) {
       return res.status(403).json({ error: 'Başka bir admin tarafından oluşturulan admin doktoru güncelleyemezsiniz.' });
     }
 
-    // Şifre değiştirme işlemi varsa
+
     if (oldPassword || newPassword || confirmNewPassword) {
-      // Tüm şifre alanları zorunlu
+
       if (!oldPassword || !newPassword || !confirmNewPassword) {
         return res.status(400).json({ error: 'Şifre değiştirmek için eski şifre, yeni şifre ve yeni şifre tekrarı gereklidir.' });
       }
 
-      // Yeni şifrelerin eşleşme kontrolü
+
       if (newPassword !== confirmNewPassword) {
         return res.status(400).json({ error: 'Yeni şifreler eşleşmiyor.' });
       }
 
-      // Eski şifre kontrolü
+
       const isOldPasswordValid = await bcrypt.compare(oldPassword, doctorToUpdate.password);
       if (!isOldPasswordValid) {
         return res.status(400).json({ error: 'Eski şifre yanlış.' });
       }
 
-      // Yeni şifreyi hashle
+
       const hashedNewPassword = await bcrypt.hash(newPassword, 10);
       doctorToUpdate.password = hashedNewPassword;
     }
@@ -408,7 +377,7 @@ const updateDoctorByTenant = async (req, res) => {
 
     await doctorToUpdate.save();
 
-    // Güncellenmiş doktoru tüm bilgileriyle birlikte getirelim (şifre hariç)
+
     const updatedDoctor = {
       id: doctorToUpdate.id,
       name: doctorToUpdate.name,
@@ -441,7 +410,7 @@ const deleteDoctor = async (req, res) => {
     const decoded = jwt.verify(token, 'secretkey');
     const jwtDoctorId = decoded.id;
 
-    // Önce isteği yapan doktoru bulalım
+
     const requestingDoctor = await Doctor.findByPk(jwtDoctorId);
     if (!requestingDoctor) {
       return res.status(404).json({ error: 'Kullanıcı bulunamadı.' });
@@ -449,7 +418,7 @@ const deleteDoctor = async (req, res) => {
 
     const doctorId = req.params.doctorId;
 
-    // Silinecek doktoru bulalım
+
     const doctorToDelete = await Doctor.findOne({ 
       where: { id: doctorId },
       attributes: ['id', 'role', 'created_by', 'tenant_id']
@@ -459,29 +428,29 @@ const deleteDoctor = async (req, res) => {
       return res.status(404).json({ error: 'Silinecek doktor bulunamadı.' });
     }
 
-    // Kendini silmeye çalışıyorsa engelle
+
     if (doctorId === jwtDoctorId) {
       return res.status(403).json({ error: 'Kendinizi silemezsiniz.' });
     }
 
-    // Admin doktor kontrolü
+
     if (requestingDoctor.role === 'admin') {
-      // Admin sadece kendi oluşturduğu doktorları silebilir
+
       if (doctorToDelete.created_by !== jwtDoctorId) {
         return res.status(403).json({ error: 'Bu doktoru silme yetkiniz yok. Sadece kendi oluşturduğunuz doktorları silebilirsiniz.' });
       }
 
-      // Admin başka bir admini silemez
+
       if (doctorToDelete.role === 'admin') {
         return res.status(403).json({ error: 'Admin doktorları silemezsiniz.' });
       }
 
-      // Alt doktorları bul
+
       const subDoctors = await Doctor.findAll({
         where: { created_by: doctorId }
       });
 
-      // Alt doktorları sil
+
       for (const subDoctor of subDoctors) {
         await subDoctor.destroy();
       }
@@ -492,7 +461,7 @@ const deleteDoctor = async (req, res) => {
         message: subDoctors.length > 0 ? 'Doktor alt doktorlarıyla birlikte silindi.' : 'Doktor silindi.' 
       });
     } else {
-      // Normal doktor hiçbir şey silemez
+
       return res.status(403).json({ error: 'Doktor silme yetkiniz yok.' });
     }
   } catch (error) {
@@ -509,7 +478,7 @@ const deleteDoctorByTenant = async (req, res) => {
     }
 
     const decoded = jwt.verify(token, 'secretkey');
-    // Sadece tenant token'ı ile işlem yapılabilir
+
     if (decoded.role) {
       return res.status(403).json({ error: 'Bu işlem sadece tenant tarafından yapılabilir!' });
     }
@@ -517,13 +486,13 @@ const deleteDoctorByTenant = async (req, res) => {
     const tenantId = decoded.id;
     const doctorId = req.params.doctorId;
 
-    // Önce tenant'ı kontrol edelim
+
     const tenant = await Tenant.findByPk(tenantId);
     if (!tenant) {
       return res.status(404).json({ error: 'Tenant bulunamadı.' });
     }
 
-    // Silinecek doktoru bulalım
+
     const doctorToDelete = await Doctor.findOne({
       where: { id: doctorId },
       attributes: ['id', 'role', 'created_by', 'tenant_id']
@@ -533,25 +502,25 @@ const deleteDoctorByTenant = async (req, res) => {
       return res.status(404).json({ error: 'Silinecek doktor bulunamadı.' });
     }
 
-    // Doktorun tenant'a ait olup olmadığını kontrol et
+
     if (doctorToDelete.tenant_id !== tenantId) {
       return res.status(403).json({ error: 'Bu doktor sizin tenant\'ınıza ait değil!' });
     }
 
-    // Eğer doktor admin ise, başka bir admin tarafından oluşturulup oluşturulmadığını kontrol et
+
     if (doctorToDelete.role === 'admin') {
-      // created_by null ise tenant tarafından oluşturulmuş demektir
+
       if (doctorToDelete.created_by !== null) {
         return res.status(403).json({ error: 'Başka bir admin tarafından oluşturulan admin doktoru silemezsiniz!' });
       }
     }
 
-    // Alt doktorları bul
+
     const subDoctors = await Doctor.findAll({
       where: { created_by: doctorId }
     });
 
-    // Alt doktorları sil
+
     for (const subDoctor of subDoctors) {
       await subDoctor.destroy();
     }

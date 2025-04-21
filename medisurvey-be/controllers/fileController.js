@@ -1,5 +1,6 @@
 const File = require('../models/File');
 const Doctor = require('../models/Doctor');
+const Form = require('../models/Form');
 const { Op } = require('sequelize');
 
 const fileController = {
@@ -46,7 +47,13 @@ const fileController = {
       }
 
       const files = await File.findAll({
-        where: whereCondition
+        where: whereCondition,
+        include: [
+          {
+            model: Form,
+            attributes: ['id', 'name', 'description', 'type']
+          }
+        ]
       });
       res.json(files);
     } catch (error) {
@@ -94,7 +101,13 @@ const fileController = {
       }
 
       const file = await File.findOne({
-        where: whereCondition
+        where: whereCondition,
+        include: [
+          {
+            model: Form,
+            attributes: ['id', 'name', 'description', 'type']
+          }
+        ]
       });
 
       if (!file) {
@@ -125,8 +138,18 @@ const fileController = {
         created_by: creatorId
       });
       
+      const fileWithForms = await File.findOne({
+        where: { id: file.id },
+        include: [
+          {
+            model: Form,
+            attributes: ['id', 'name', 'description', 'type']
+          }
+        ]
+      });
+      
       console.log('Dosya başarıyla oluşturuldu:', file.id);
-      res.status(201).json(file);
+      res.status(201).json(fileWithForms);
     } catch (error) {
       console.error('Create File Error:', error);
       console.error('Create File Error Stack:', error.stack);
@@ -168,7 +191,18 @@ const fileController = {
         return res.status(404).json({ message: 'Dosya bulunamadı' });
       }
       await file.update(req.body);
-      res.json(file);
+      
+      const updatedFile = await File.findOne({
+        where: { id: file.id },
+        include: [
+          {
+            model: Form,
+            attributes: ['id', 'name', 'description', 'type']
+          }
+        ]
+      });
+      
+      res.json(updatedFile);
     } catch (error) {
       console.error('Update File Error:', error);
       res.status(400).json({ message: error.message });
@@ -202,7 +236,13 @@ const fileController = {
       }
 
       const file = await File.findOne({
-        where: whereCondition
+        where: whereCondition,
+        include: [
+          {
+            model: Form,
+            attributes: ['id', 'name', 'description', 'type']
+          }
+        ]
       });
 
       if (!file) {
@@ -261,7 +301,13 @@ const fileController = {
           created_by: {
             [Op.in]: doctorIds
           }
-        }
+        },
+        include: [
+          {
+            model: Form,
+            attributes: ['id', 'name', 'description', 'type']
+          }
+        ]
       });
       
       console.log('Bulunan dosya sayısı:', files.length);
@@ -290,7 +336,13 @@ const fileController = {
           created_by: {
             [Op.in]: doctorIds
           }
-        }
+        },
+        include: [
+          {
+            model: Form,
+            attributes: ['id', 'name', 'description', 'type']
+          }
+        ]
       });
 
       if (!file) {
@@ -327,7 +379,18 @@ const fileController = {
         return res.status(404).json({ message: 'Dosya bulunamadı' });
       }
       await file.update(req.body);
-      res.json(file);
+      
+      const updatedFile = await File.findOne({
+        where: { id: file.id },
+        include: [
+          {
+            model: Form,
+            attributes: ['id', 'name', 'description', 'type']
+          }
+        ]
+      });
+      
+      res.json(updatedFile);
     } catch (error) {
       console.error('Update File for Tenant Error:', error);
       res.status(400).json({ message: error.message });
@@ -366,7 +429,13 @@ const fileController = {
           created_by: {
             [Op.in]: doctorIds
           }
-        }
+        },
+        include: [
+          {
+            model: Form,
+            attributes: ['id', 'name', 'description', 'type']
+          }
+        ]
       });
 
       if (!file) {
@@ -380,7 +449,6 @@ const fileController = {
       } catch (deleteError) {
         console.error('Dosya silme hatası (referans kısıtlaması):', deleteError);
         if (deleteError.name === 'SequelizeForeignKeyConstraintError') {
-          // Bu dosyaya referans veren kayıtlar olduğunda
           return res.status(400).json({ 
             message: 'Bu dosya kullanımda olduğu için silinemiyor. Önce bu dosyaya bağlı formları silmelisiniz.',
             details: deleteError.message 

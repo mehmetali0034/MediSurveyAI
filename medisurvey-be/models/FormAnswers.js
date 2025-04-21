@@ -19,15 +19,6 @@ const FormAnswers = sequelize.define('FormAnswers', {
     type: DataTypes.JSON,
     allowNull: false
   },
-  level: {
-    type: DataTypes.INTEGER,
-    allowNull: false
-  },
-  level_answers: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    field: 'level_answers'
-  },
   type: {
     type: DataTypes.ENUM('for me', 'for patients'),
     defaultValue: 'for patients',

@@ -27,6 +27,14 @@ export default function Index() {
   const [fields, setFields] = useState([]);
   const [forPatients, setForPatients] = useState("");
 
+  const initialValues = {
+    name: "",
+    description: "",
+    type: "for patients",
+    questions: [],
+    file_id: "",
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -43,7 +51,6 @@ export default function Index() {
         }
         return questionData;
       }),
-      level: 10,
       type: forPatients,
       file_id: id,
     };

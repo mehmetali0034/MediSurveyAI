@@ -18,7 +18,20 @@ const addPatient = async (req, res) => {
       return res.status(404).json({ message: 'Doktor bulunamadı!' });
     }
 
-    const { firstName, lastName, email, dateOfBirth, gender, primaryPhone, secondaryPhone, fileId } = req.body;
+    const { firstName, lastName, email, dateOfBirth, gender, primaryPhone, secondaryPhone, fileIds } = req.body;
+
+    let parsedFileIds = fileIds;
+    if (typeof fileIds === 'string') {
+      try {
+        parsedFileIds = JSON.parse(fileIds);
+      } catch (e) {
+        parsedFileIds = [fileIds];
+      }
+    } else if (!Array.isArray(fileIds) && fileIds) {
+      parsedFileIds = [fileIds];
+    } else if (!fileIds) {
+      parsedFileIds = [];
+    }
 
     const newPatient = await Patient.create({
       firstName,
@@ -28,19 +41,28 @@ const addPatient = async (req, res) => {
       gender,
       primaryPhone,
       secondaryPhone,
-      fileId,
+      fileIds: parsedFileIds,
       doctorId: doctorId, 
     });
 
-    const patientWithFile = await Patient.findOne({
-      where: { id: newPatient.id },
-      include: [
-        Doctor, 
-        File
-      ]
-    });
+    let files = [];
+    if (parsedFileIds && parsedFileIds.length > 0) {
+      files = await File.findAll({
+        where: { 
+          id: { 
+            [Op.in]: parsedFileIds 
+          } 
+        }
+      });
+    }
 
-    res.status(201).json({ status: 'success', patient: patientWithFile });
+    const patientWithFiles = {
+      ...newPatient.toJSON(),
+      Files: files,
+      Doctor: doctor
+    };
+
+    res.status(201).json({ status: 'success', patient: patientWithFiles });
   } catch (error) {
     console.error('Hata:', error);
     res.status(500).json({ message: error.message });
@@ -61,9 +83,20 @@ const addPatientByTenant = async (req, res) => {
 
     const tenantId = decoded.id;
 
-    const { firstName, lastName, email, dateOfBirth, gender, primaryPhone, secondaryPhone, fileId, doctorId } = req.body;
+    const { firstName, lastName, email, dateOfBirth, gender, primaryPhone, secondaryPhone, fileIds, doctorId } = req.body;
 
-
+    let parsedFileIds = fileIds;
+    if (typeof fileIds === 'string') {
+      try {
+        parsedFileIds = JSON.parse(fileIds);
+      } catch (e) {
+        parsedFileIds = [fileIds];
+      }
+    } else if (!Array.isArray(fileIds) && fileIds) {
+      parsedFileIds = [fileIds];
+    } else if (!fileIds) {
+      parsedFileIds = [];
+    }
 
     const newPatient = await Patient.create({
       firstName,
@@ -73,19 +106,29 @@ const addPatientByTenant = async (req, res) => {
       gender,
       primaryPhone,
       secondaryPhone,
-      fileId,
+      fileIds: parsedFileIds,
       doctorId
     });
 
-    const patientWithFile = await Patient.findOne({
-      where: { id: newPatient.id },
-      include: [
-        Doctor, 
-        File
-      ]
-    });
+    const doctor = await Doctor.findByPk(doctorId);
+    let files = [];
+    if (parsedFileIds && parsedFileIds.length > 0) {
+      files = await File.findAll({
+        where: { 
+          id: { 
+            [Op.in]: parsedFileIds 
+          } 
+        }
+      });
+    }
 
-    res.status(201).json({ status: 'success', patient: patientWithFile });
+    const patientWithFiles = {
+      ...newPatient.toJSON(),
+      Files: files,
+      Doctor: doctor
+    };
+
+    res.status(201).json({ status: 'success', patient: patientWithFiles });
   } catch (error) {
     console.error('Hata:', error);
     res.status(500).json({ message: error.message });
@@ -102,10 +145,7 @@ const getPatientInfo = async (req, res) => {
     const { id } = req.params;
     const patient = await Patient.findOne({
       where: { id },
-      include: [
-        Doctor,
-        File
-      ]
+      include: [Doctor]
     });
 
     if (!patient) {
@@ -125,10 +165,26 @@ const getPatientInfo = async (req, res) => {
       
       if (!allowedDoctorIds.includes(patient.doctorId)) {
         return res.status(403).json({ message: 'Bu hasta bilgisine erişim yetkiniz yok!' });
-      }
+      } 
     }
 
-    res.status(200).json({ status: 'success', patient });
+    let files = [];
+    if (patient.fileIds && patient.fileIds.length > 0) {
+      files = await File.findAll({
+        where: { 
+          id: { 
+            [Op.in]: patient.fileIds 
+          } 
+        }
+      });
+    }
+
+    const patientWithFiles = {
+      ...patient.toJSON(),
+      Files: files
+    };
+
+    res.status(200).json({ status: 'success', patient: patientWithFiles });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -156,8 +212,7 @@ const getPatientInfoByTenant = async (req, res) => {
         {
           model: Doctor,
           where: { tenant_id: tenantId }
-        },
-        File
+        }
       ]
     });
 
@@ -165,7 +220,23 @@ const getPatientInfoByTenant = async (req, res) => {
       return res.status(404).json({ message: 'Hasta bulunamadı veya bu hastaya erişim yetkiniz yok!' });
     }
 
-    res.status(200).json({ status: 'success', patient });
+    let files = [];
+    if (patient.fileIds && patient.fileIds.length > 0) {
+      files = await File.findAll({
+        where: { 
+          id: { 
+            [Op.in]: patient.fileIds 
+          } 
+        }
+      });
+    }
+
+    const patientWithFiles = {
+      ...patient.toJSON(),
+      Files: files
+    };
+
+    res.status(200).json({ status: 'success', patient: patientWithFiles });
   } catch (error) {
     console.error('Hata:', error);
     res.status(500).json({ message: error.message });
@@ -194,24 +265,35 @@ const getAllPatients = async (req, res) => {
             [Op.in]: allowedDoctorIds
           }
         },
-        include: [
-          Doctor, 
-          File
-        ]
+        include: [Doctor]
       });
     } else if (role === 'doctor') {
       patients = await Patient.findAll({
         where: { doctorId: doctorId },
-        include: [
-          Doctor, 
-          File
-        ]
+        include: [Doctor]
       });
     } else {
       return res.status(403).json({ message: 'Bu işlem için yetkiniz yok!' });
     }
 
-    res.status(200).json({ status: 'success', patients });
+    const patientsWithFiles = await Promise.all(patients.map(async (patient) => {
+      let files = [];
+      if (patient.fileIds && patient.fileIds.length > 0) {
+        files = await File.findAll({
+          where: { 
+            id: { 
+              [Op.in]: patient.fileIds 
+            } 
+          }
+        });
+      }
+      return {
+        ...patient.toJSON(),
+        Files: files
+      };
+    }));
+
+    res.status(200).json({ status: 'success', patients: patientsWithFiles });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -254,15 +336,31 @@ const getAllPatientsByTenant = async (req, res) => {
               }
             ]
           }
-        },
-        File
+        }
       ]
     });
 
+    const patientsWithFiles = await Promise.all(patients.map(async (patient) => {
+      let files = [];
+      if (patient.fileIds && patient.fileIds.length > 0) {
+        files = await File.findAll({
+          where: { 
+            id: { 
+              [Op.in]: patient.fileIds 
+            } 
+          }
+        });
+      }
+      return {
+        ...patient.toJSON(),
+        Files: files
+      };
+    }));
+
     res.status(200).json({ 
       status: 'success', 
-      count: patients.length,
-      patients 
+      count: patientsWithFiles.length,
+      patients: patientsWithFiles 
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -279,12 +377,25 @@ const updatePatient = async (req, res) => {
     const { id } = req.params;
     const updateData = req.body;
 
+    if (updateData.fileIds !== undefined) {
+      let parsedFileIds = updateData.fileIds;
+      if (typeof updateData.fileIds === 'string') {
+        try {
+          parsedFileIds = JSON.parse(updateData.fileIds);
+        } catch (e) {
+          parsedFileIds = [updateData.fileIds];
+        }
+      } else if (!Array.isArray(updateData.fileIds) && updateData.fileIds) {
+        parsedFileIds = [updateData.fileIds];
+      } else if (!updateData.fileIds) {
+        parsedFileIds = [];
+      }
+      updateData.fileIds = parsedFileIds;
+    }
+
     const patient = await Patient.findOne({
       where: { id },
-      include: [
-        Doctor, 
-        File
-      ]
+      include: [Doctor]
     });
 
     if (!patient) {
@@ -311,13 +422,26 @@ const updatePatient = async (req, res) => {
     
     const updatedPatient = await Patient.findOne({
       where: { id },
-      include: [
-        Doctor, 
-        File
-      ]
+      include: [Doctor]
     });
     
-    res.status(200).json({ status: 'success', patient: updatedPatient });
+    let files = [];
+    if (updatedPatient.fileIds && updatedPatient.fileIds.length > 0) {
+      files = await File.findAll({
+        where: { 
+          id: { 
+            [Op.in]: updatedPatient.fileIds 
+          } 
+        }
+      });
+    }
+
+    const patientWithFiles = {
+      ...updatedPatient.toJSON(),
+      Files: files
+    };
+    
+    res.status(200).json({ status: 'success', patient: patientWithFiles });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -340,14 +464,29 @@ const updatePatientByTenant = async (req, res) => {
     const { id } = req.params;
     const updateData = req.body;
 
+    if (updateData.fileIds !== undefined) {
+      let parsedFileIds = updateData.fileIds;
+      if (typeof updateData.fileIds === 'string') {
+        try {
+          parsedFileIds = JSON.parse(updateData.fileIds);
+        } catch (e) {
+          parsedFileIds = [updateData.fileIds];
+        }
+      } else if (!Array.isArray(updateData.fileIds) && updateData.fileIds) {
+        parsedFileIds = [updateData.fileIds];
+      } else if (!updateData.fileIds) {
+        parsedFileIds = [];
+      }
+      updateData.fileIds = parsedFileIds;
+    }
+
     const patient = await Patient.findOne({
       where: { id },
       include: [
         {
           model: Doctor,
           where: { tenant_id: tenantId }
-        },
-        File
+        }
       ]
     });
 
@@ -363,12 +502,27 @@ const updatePatientByTenant = async (req, res) => {
         {
           model: Doctor,
           where: { tenant_id: tenantId }
-        },
-        File
+        }
       ]
     });
     
-    res.status(200).json({ status: 'success', patient: updatedPatient });
+    let files = [];
+    if (updatedPatient.fileIds && updatedPatient.fileIds.length > 0) {
+      files = await File.findAll({
+        where: { 
+          id: { 
+            [Op.in]: updatedPatient.fileIds 
+          } 
+        }
+      });
+    }
+
+    const patientWithFiles = {
+      ...updatedPatient.toJSON(),
+      Files: files
+    };
+    
+    res.status(200).json({ status: 'success', patient: patientWithFiles });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

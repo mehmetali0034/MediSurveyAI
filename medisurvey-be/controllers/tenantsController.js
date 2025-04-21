@@ -44,7 +44,6 @@ const updateTenant = async (req, res) => {
     const tenantId = req.params.tenantId;
     const { name, address, phone_number, email, plan_type, oldPassword, newPassword, confirmNewPassword } = req.body;
 
-    // Erişim yetkisi kontrolü
     if (tenantId !== jwtTenantId) {
       return res.status(403).json({ error: 'Bu kuruma erişim yetkiniz yok.' });
     }
@@ -55,25 +54,20 @@ const updateTenant = async (req, res) => {
       return res.status(404).json({ error: 'Kurum bulunamadı.' });
     }
 
-    // Şifre değiştirme işlemi varsa
     if (oldPassword || newPassword || confirmNewPassword) {
-      // Tüm şifre alanları zorunlu
       if (!oldPassword || !newPassword || !confirmNewPassword) {
         return res.status(400).json({ error: 'Şifre değiştirmek için eski şifre, yeni şifre ve yeni şifre tekrarı gereklidir.' });
       }
 
-      // Yeni şifrelerin eşleşme kontrolü
       if (newPassword !== confirmNewPassword) {
         return res.status(400).json({ error: 'Yeni şifreler eşleşmiyor.' });
       }
 
-      // Eski şifre kontrolü
       const isOldPasswordValid = await bcrypt.compare(oldPassword, tenantToUpdate.password);
       if (!isOldPasswordValid) {
         return res.status(400).json({ error: 'Eski şifre yanlış.' });
       }
 
-      // Yeni şifreyi hashle
       const hashedNewPassword = await bcrypt.hash(newPassword, 10);
       tenantToUpdate.password = hashedNewPassword;
     }
@@ -86,7 +80,6 @@ const updateTenant = async (req, res) => {
 
     await tenantToUpdate.save();
 
-    // Şifreyi response'dan çıkar
     const tenantResponse = {
       id: tenantToUpdate.id,
       name: tenantToUpdate.name,
@@ -114,7 +107,6 @@ const deleteTenant = async (req, res) => {
 
     const tenantId = req.params.tenantId;
 
-    // Erişim yetkisi kontrolü
     if (tenantId !== jwtTenantId) {
       return res.status(403).json({ error: 'Bu kuruma erişim yetkiniz yok.' });
     }

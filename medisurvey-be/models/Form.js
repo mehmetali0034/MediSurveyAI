@@ -19,10 +19,6 @@ const Form = sequelize.define('Form', {
     type: DataTypes.JSON,
     allowNull: false
   },
-  level: {
-    type: DataTypes.INTEGER,
-    allowNull: false
-  },
   type: {
     type: DataTypes.ENUM('for me', 'for patients'),
     allowNull: false

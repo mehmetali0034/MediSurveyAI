@@ -198,11 +198,6 @@ const formAnswersController = {
         delete formAnswerData.formId;
       }
 
-      if (formAnswerData.levelAnswers && !formAnswerData.level_answers) {
-        formAnswerData.level_answers = formAnswerData.levelAnswers;
-        delete formAnswerData.levelAnswers;
-      }
-      
       const formAnswer = await FormAnswers.create(formAnswerData);
       
       const formAnswerWithRelations = await FormAnswers.findOne({
@@ -248,11 +243,6 @@ const formAnswersController = {
       if (updateData.patientId && !updateData.patient_id) {
         updateData.patient_id = updateData.patientId;
         delete updateData.patientId;
-      }
-
-      if (updateData.levelAnswers && !updateData.level_answers) {
-        updateData.level_answers = updateData.levelAnswers;
-        delete updateData.levelAnswers;
       }
 
       if (updateData.formId && !updateData.form_id) {
@@ -453,11 +443,6 @@ const formAnswersController = {
       if (updateData.patientId && !updateData.patient_id) {
         updateData.patient_id = updateData.patientId;
         delete updateData.patientId;
-      }
-
-      if (updateData.levelAnswers && !updateData.level_answers) {
-        updateData.level_answers = updateData.levelAnswers;
-        delete updateData.levelAnswers;
       }
 
       if (updateData.formId && !updateData.form_id) {
