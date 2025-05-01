@@ -116,4 +116,17 @@ export default class TenantService {
       console.log("Sorun oluştu")
     }
   }
+  deleteDoctor = async (data)=>{
+    getP
+    try{
+      const response = await axios.delete( `http://localhost:3000/api/doctors/tenant/${data}`,{
+        headers:{
+          Authorization: `Bearer ${token}`
+        }
+      })
+
+    }catch(error){
+
+    }
+  }
 }

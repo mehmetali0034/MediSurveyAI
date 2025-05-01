@@ -13,7 +13,7 @@ import {
 import React, { useState } from "react";
 import { tokens } from "../../theme";
 import Headeer from "../../components/Headeer";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import FormService from "../../services/doctorServices/FormService";
 
 export default function Index() {
@@ -26,7 +26,7 @@ export default function Index() {
   const [description, setDescription] = useState("");
   const [fields, setFields] = useState([]);
   const [forPatients, setForPatients] = useState("");
-
+  const navigate = useNavigate();
   const initialValues = {
     name: "",
     description: "",
@@ -63,6 +63,7 @@ export default function Index() {
         setTitle("Untitled Form"); 
         setDescription("");
         setFields([]);
+        navigate("/files")
       } catch (err) {
         console.error("Form oluşturulurken hata:", err);
         alert("Form oluşturulurken bir hata oluştu!");
@@ -150,7 +151,7 @@ export default function Index() {
             {fields.map((field, index) => (
               <Box key={index} sx={{ marginBottom: 3 }}>
                 <Typography variant="h6" gutterBottom>
-                  Soru {index + 1}
+                  Question {index + 1} : 
                 </Typography>
 
                 <Box

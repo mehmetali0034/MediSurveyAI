@@ -127,7 +127,7 @@ export default function TenDashboard() {
                   Total Number Of Patients  
                 </Typography>
                 <Typography variant="h2">
-                  <CountUp start={0} end={patients.length} duration={2.5} />
+                  <CountUp start={0} end={patients?.length} duration={2.5} />
                 </Typography>
               </Box>
             </Grid>

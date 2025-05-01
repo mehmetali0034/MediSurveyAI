@@ -41,7 +41,7 @@ export default function AddPatient() {
     phoneOne: "",
     phoneTwo: "",
     email: "",
-    file: "",
+    files: [],
   };
 
   const SignupSchema = Yup.object().shape({
@@ -58,7 +58,9 @@ export default function AddPatient() {
     phoneTwo: Yup.string()
       .required("This field is required")
       .matches(/^\+?[1-9]\d{1,14}$/, "Please enter a valid phone number."),
-    file: Yup.string().required("This field is required"),
+    files: Yup.array()
+      .min(1, "At least one file must be selected")
+      .required("This field is required"),
     email: Yup.string()
       .required("This field is required")
       .email("Invalid email format"),
@@ -67,11 +69,9 @@ export default function AddPatient() {
   const patientService = new PatientService();
 
   const clickToAddPatient = (values, { resetForm, setSubmitting }) => {
+    const selectedFiles = files.filter((f) => values.files.includes(f.name));
+    const fileIds = selectedFiles.map((f) => f.id);
 
-    const selectedFile = files.find((f) => f.name === values.file); 
-    const fileId = selectedFile ? selectedFile.id : null;
-    console.log("File ID",fileId)
-    console.log("Selected File",selectedFile)
     const patientData = {
       firstName: values.firstName,
       lastName: values.lastName,
@@ -79,9 +79,10 @@ export default function AddPatient() {
       gender: values.gender,
       primaryPhone: values.phoneOne,
       secondaryPhone: values.phoneTwo,
-      fileId: fileId,
+      fileIds: fileIds,
       dateOfBirth: values.dateOfBirth,
-    };debugger;
+    };
+    debugger;
 
     const token = localStorage.getItem("token");
 
@@ -94,8 +95,9 @@ export default function AddPatient() {
       .addPatient(patientData, token)
       .then((response) => {
         setOpenSnackBar(true);
-        console.log("Patient successfully registered:", response.data); debugger;
-        resetForm(); // formu sıfırlıyoruz 
+        console.log("Patient successfully registered:", response.data);
+        debugger;
+        resetForm(); // formu sıfırlıyoruz
       })
       .catch((error) => {
         console.error(
@@ -118,7 +120,8 @@ export default function AddPatient() {
       try {
         const response = await fileService.getAllFiles();
         console.log("Files getirildi: ", response);
-        setFiles(response); debugger
+        setFiles(response);
+        debugger;
       } catch (err) {
         console.error("Sorun oluştu:", err);
       }
@@ -234,23 +237,43 @@ export default function AddPatient() {
                 variant="filled"
                 sx={{ gridColumn: "span 1" }}
               >
-                <InputLabel>File</InputLabel>
-
+                <InputLabel>Files</InputLabel>
                 <Select
-                  name="file"
-                  value={values.file}
+                  name="files"
+                  multiple
+                  value={values.files}
                   onBlur={handleBlur}
                   onChange={handleChange}
-                  error={Boolean(touched.file && errors.file)}
+                  error={Boolean(touched.files && errors.files)}
+                  renderValue={(selected) => (
+                    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                      {selected.map((value, idx) => (
+                        <Box
+                          key={idx}
+                          sx={{
+                            backgroundColor: colors.blueAccent[600],
+                            padding: "1px 8px",
+                            borderRadius: "16px",
+                            color: "white",
+                            fontSize: "0.8rem",
+                          }}
+                        >
+                          {value}
+                        </Box>
+                      ))}
+                    </Box>
+                  )}
                 >
                   {files.map((file, index) => (
-                    <MenuItem key={index} value={file?.name ||  " "}>
-                      {file?.name ||  " "}
-                    </MenuItem> 
+                    <MenuItem key={index} value={file?.name || ""}>
+                      {file?.name || ""}
+                    </MenuItem>
                   ))}
                 </Select>
-                {touched.file && errors.file && (
-                  <Box sx={{ color: colors.redAccent[500] }}>{errors.file}</Box>
+                {touched.files && errors.files && (
+                  <Box sx={{ color: colors.redAccent[500] }}>
+                    {errors.files}
+                  </Box>
                 )}
               </FormControl>
 

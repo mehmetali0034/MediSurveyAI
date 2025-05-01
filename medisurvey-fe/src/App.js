@@ -31,7 +31,7 @@ import CreateNewForm from "./scenes/createForm"
 import Profile from "./scenes/profile/doctorProfile"
 import File from "./scenes/file/File"
 import PatientProfile from "./scenes/profile/PatientProfile";
-
+import FormInfo from "./scenes/formInfo/FormInfo";
 
 
 function App() {
@@ -82,6 +82,7 @@ function App() {
                       <Route path="/profile" element={<Profile/>} />
                       <Route path="/files/:id" element={<File/>} />
                       <Route path="/patients/:id" element={<PatientProfile/>} />
+                      <Route path="/files/:id/:formId" element={<FormInfo/>} />
                     </Routes>
                   </main>
                 </>

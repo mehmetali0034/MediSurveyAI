@@ -15,9 +15,14 @@ export default function Patients() {
   const patientService = new PatientService();
   const navigate = useNavigate()
   const [patients, setPatients] = useState([])
+  const [paginationModel, setPaginationModel] = useState({
+      page: 0,
+      pageSize: 5,
+    });
   const clickToAddPatients =()=>{
     navigate("/AddPatient")
   }
+
   
   useEffect(() => {
     const fetchAllPatients = async () => {
@@ -72,12 +77,6 @@ export default function Patients() {
     {
       field: 'secondaryPhone',
       headerName: 'Secondary Phone',
-      description: 'This column was created for users phone number',
-      flex:1
-    },
-    {
-      field: 'file',
-      headerName: 'File',
       description: 'This column was created for users phone number',
       flex:1
     },
@@ -146,6 +145,11 @@ export default function Patients() {
 
       }}>
         <DataGrid onCellClick={handleCellClick} checkboxSelection rows={patients}
+        autoHeight
+        pagination
+        paginationModel={paginationModel}
+        onPaginationModelChange={setPaginationModel}
+        rowsPerPageOptions={[5]}
         columns={columns} components={{ Toolbar: GridToolbar }} />
       </Box>
     </Box>

@@ -144,7 +144,7 @@ export default function TenantDoctors() {
             backgroundColor: colors.primary[400],
             width:"90%"
           }}
-          
+          checkboxSelection
           rows={allDoctors}
           columns={columns}
           onSelectionModelChange={handleSelectionChange}

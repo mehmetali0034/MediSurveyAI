@@ -24,7 +24,16 @@ export default class FileService {
         return response.data;
     }catch(error){
         console.log("Bir sorun oluştu.getFileInfo")
-
+    }  
+ }
+ deleteFile = async (fileId)=>{
+    try{
+        const response = await axiosInstance.delete(`http://localhost:3000/api/files/${fileId}`);
+        return response.data
+    }catch (error) {
+        console.error("Bir sorun oluştu:", error.response?.data || error.message);
+        throw error;
     }
+
  }
 }

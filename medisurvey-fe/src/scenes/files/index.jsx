@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Box, Button } from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 import { mockDataInvoices } from "../../data/mockData";
 import Headeer from "../../components/Headeer";
 import { DataGrid } from "@mui/x-data-grid";
@@ -17,6 +17,10 @@ export default function Files() {
   const navigate = useNavigate();
   const [openDialog, setOpenDialog] = useState(false);
   const [files, setFiles] = useState([]);
+  const [paginationModel, setPaginationModel] = useState({
+      page: 0,
+      pageSize: 5,
+    });
   const columns = [
     {
       field: "name",
@@ -36,13 +40,13 @@ export default function Files() {
       renderCell: (params) => (
         <Button
           variant="contained"
-          sx={{backgroundColor:colors.greenAccent[400]}}
+          sx={{backgroundColor:colors.greenAccent[600]}}
           onClick={(event) => {
             event.stopPropagation(); // Row click eventini durdurur
             handleAddFormClick(params);
           }}
         >
-          Form Ekle
+          Add Form
         </Button>
       ),
     },
@@ -124,7 +128,17 @@ export default function Files() {
           },
         }}
       >
-        <DataGrid onRowClick={handleRowClick} rows={files} columns={columns} />
+        <DataGrid onRowClick={handleRowClick} rows={files} columns={columns} autoHeight
+         pagination
+         paginationModel={paginationModel}
+         onPaginationModelChange={setPaginationModel}
+         rowsPerPageOptions={[5]}
+         localeText={{
+          noRowsLabel:(
+            <Typography>You haven't created any forms yet</Typography>
+          )
+         }}
+         />
       </Box>
       <CreateNewFile
         openDialog={openDialog}

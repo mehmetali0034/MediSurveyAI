@@ -144,6 +144,7 @@ export default function Team() {
           checkboxSelection
           rows={doctors}
           columns={columns}
+          pageSize={5}
           onSelectionModelChange={handleSelectionChange}
         />
       </Box>

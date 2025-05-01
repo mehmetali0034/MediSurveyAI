@@ -127,7 +127,7 @@ export default function PatientProfile() {
           <Box
             sx={{ display: "flex", flexDirection: "row", alignItems: "center" }}
           >
-            <Typography sx={{ width: "30%" }}>Files: </Typography>
+            <Typography sx={{ width: "30%" }}>Files  </Typography>
             <TextField sx={{width:"80%"}} value={patientInfo?.patient?.File?.name || ""
 
             } /> 
