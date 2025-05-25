@@ -20,4 +20,31 @@ export default class FormService {
       throw error; 
     }
   }
+  updateForm =async (formId,updatedFormData)=>{
+    try{
+      const response = await axiosInstance.put(`http://localhost:3000/api/forms/${formId}`,updatedFormData);
+      return response.data
+    }catch(error){
+      console.error("Bir sorun oluştu:", error.response?.data || error.message);
+      throw error;
+    }
+  }
+  formAnswer = async (data)=>{
+    try{
+      const response = await axiosInstance.post("http://localhost:3000/api/form-answers",data);
+      return response.data
+    }catch(error){
+      console.error("Bir sorun oluştu:", error.response?.data || error.message);
+      throw error;
+    }
+  }
+  getAllForms = async ()=>{
+    try{
+      const response = await axiosInstance("http://localhost:3000/api/forms");
+      return response.data;
+    }catch(error){
+      console.error("Bir sorun oluştu:", error.response?.data || error.message);
+      throw error;
+    }
+  }
 }

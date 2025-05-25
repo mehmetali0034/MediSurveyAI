@@ -38,4 +38,13 @@ export default class PatientService {
       throw error;
     }
   }
+  updatePatient = async (patientId,updatedData)=>{
+    try{
+      const response = await axiosInstance.put(`http://localhost:3000/api/patients/${patientId}`,updatedData);
+      return response.data;
+    }catch(error){
+      console.log("Bir sorun oluştu.", error.response?.data || error.message);
+      throw error;
+    }
+  }
 }

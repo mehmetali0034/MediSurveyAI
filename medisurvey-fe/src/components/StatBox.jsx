@@ -5,7 +5,7 @@ import { useTheme } from "@emotion/react";
 import ProgressCircle from "./ProgressCircle";
 
 export default function StatBox(props) {
-    const {title, subtitle, icon, increase, progress} = props
+    const {title, subtitle, icon,progress} = props
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   return (
@@ -25,9 +25,7 @@ export default function StatBox(props) {
       </Box>
       <Box>
         <ProgressCircle progress={progress}/>
-        <Typography marginTop={2} variant="h6" color={colors.greenAccent[400]} fontStyle="italic">
-            +{increase}%
-        </Typography>
+        
       </Box>
     </Box>
   );

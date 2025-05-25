@@ -15,7 +15,6 @@ import {
 } from "@mui/material";
 import Headeer from "../../components/Headeer";
 import { DataGrid } from "@mui/x-data-grid";
-
 export default function File() {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
@@ -154,7 +153,7 @@ export default function File() {
               width: "45%",
             }}
           >
-            <Typography sx={{ width: "25%" }}>File Name :</Typography>
+            <Typography sx={{ width: "25%" }}>Number Of Patients :</Typography>
 
             <TextField sx={{ width: "80%" }} />
           </Box>
@@ -170,6 +169,22 @@ export default function File() {
           width: "100%",
         }}
       >
+        <Typography variant="h3"
+          component="h2"
+          gutterBottom
+          sx={{ fontWeight: "bold" }}>
+          
+          Forms
+        </Typography>
+        <Typography
+                  variant="h5"
+                  component="h2"
+                  gutterBottom
+                  sx={{ fontWeight: "bold", mb: 3, color: colors.grey[300] }}
+                >
+                  Forms Belonging to the File
+ 
+                </Typography>
         <Box
           sx={{
             display: "flex",
@@ -238,7 +253,7 @@ export default function File() {
             width: "95%",
           }}
         >
-          <Button onClick={()=>{setDialogState(true)}} sx={{ backgroundColor: colors.redAccent[400] }}>
+          <Button onClick={()=>{setDialogState(true)}} sx={{color:"white", backgroundColor: colors.redAccent[500] }}>
             Delete File
           </Button>
         </Box>

@@ -67,7 +67,7 @@ const booleanValue = !!value; // true (eğer value boş değilse)
     };
   
     try {
-      await doctorService.addDoctor(doctorData,token);debugger
+      await doctorService.addDoctor(doctorData,token)
       setOpenSnack(true);
       resetForm();
     } catch (error) {

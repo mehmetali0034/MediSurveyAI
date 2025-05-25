@@ -32,7 +32,8 @@ import Profile from "./scenes/profile/doctorProfile"
 import File from "./scenes/file/File"
 import PatientProfile from "./scenes/profile/PatientProfile";
 import FormInfo from "./scenes/formInfo/FormInfo";
-
+import FormUEdit from "./scenes/formEdit/FormEdit.jsx";
+import FormFillOut from "./scenes/formFillOut/FormFillOut.jsx";
 
 function App() {
   const [theme, colorMode] = useMode();
@@ -64,7 +65,6 @@ function App() {
                   <main className="content">
                     <Topbar setIsSidebar={setIsSidebar} />
                     <Routes>
-                    
                       <Route path="/dashboard" element={<Dashboard />} />
                       <Route path="/team" element={<Team />} />
                       <Route path="/bar" element={<Bar />} />
@@ -83,6 +83,8 @@ function App() {
                       <Route path="/files/:id" element={<File/>} />
                       <Route path="/patients/:id" element={<PatientProfile/>} />
                       <Route path="/files/:id/:formId" element={<FormInfo/>} />
+                      <Route path="/files/:id/:formId/edit" element={<FormUEdit/>}/>
+                      <Route path="/files/:id/:formId/fill-out" element={<FormFillOut/>}/>
                     </Routes>
                   </main>
                 </>

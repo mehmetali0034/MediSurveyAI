@@ -15,6 +15,7 @@ import { tokens } from "../../theme";
 import Headeer from "../../components/Headeer";
 import { useNavigate, useParams } from "react-router-dom";
 import FormService from "../../services/doctorServices/FormService";
+import SnackbarComponent from "../../components/SnackbarComponent";
 
 export default function Index() {
   const theme = useTheme();
@@ -27,13 +28,7 @@ export default function Index() {
   const [fields, setFields] = useState([]);
   const [forPatients, setForPatients] = useState("");
   const navigate = useNavigate();
-  const initialValues = {
-    name: "",
-    description: "",
-    type: "for patients",
-    questions: [],
-    file_id: "",
-  };
+  const [snackbarState, setSnackbarState] = useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -59,18 +54,20 @@ export default function Index() {
       try {
         const response = await formService.createForm(data);
         console.log("Form başarıyla oluşturuldu:", response);
-        alert("Form başarıyla gönderildi!");
-        setTitle("Untitled Form"); 
+        setSnackbarState(true);
+        setTitle("Untitled Form");
         setDescription("");
         setFields([]);
-        navigate("/files")
+        setTimeout(() => {
+          navigate("/files");
+        }, 3000); // Snackbar görünme süresi kadar (örneğin 3 saniye)
       } catch (err) {
         console.error("Form oluşturulurken hata:", err);
         alert("Form oluşturulurken bir hata oluştu!");
       }
-
     };
-    handleCreateForm(data);debugger
+    handleCreateForm(data);
+    debugger;
   };
 
   const handleAddTextQuestion = () => {
@@ -79,6 +76,7 @@ export default function Index() {
       question: "",
     };
     setFields([...fields, newField]);
+    console.log(fields);
   };
 
   const handleAddMultipleChoiceQuestion = () => {
@@ -112,6 +110,14 @@ export default function Index() {
     setForPatients(type === "sendToPatient" ? "for patients" : "for me");
   };
 
+  const handleDeleteQuestion = (index) => {
+    const updatedFields = [...fields];
+    updatedFields.splice(index, 1);
+    setFields(updatedFields);
+  };
+  const handleCloseSnackBar = () => {
+    setSnackbarState(false);
+  };
   return (
     <Box sx={{ padding: 4 }}>
       <Headeer title={"Create Form"} subtitle={"Create Form For Patients"} />
@@ -151,7 +157,7 @@ export default function Index() {
             {fields.map((field, index) => (
               <Box key={index} sx={{ marginBottom: 3 }}>
                 <Typography variant="h6" gutterBottom>
-                  Question {index + 1} : 
+                  Question {index + 1} :
                 </Typography>
 
                 <Box
@@ -161,6 +167,8 @@ export default function Index() {
                     border: `2px solid ${colors.primary[100]}`,
                     borderTop: `3px solid`,
                     borderLeft: `4px solid ${colors.greenAccent[400]}`,
+                    display: "flex",
+                    flexDirection: "column",
                   }}
                 >
                   <TextField
@@ -169,7 +177,9 @@ export default function Index() {
                     label="Soru Metnini Girin"
                     sx={{ width: "80%", m: 2 }}
                     value={field.question}
-                    onChange={(e) => handleQuestionChange(index, e.target.value)}
+                    onChange={(e) =>
+                      handleQuestionChange(index, e.target.value)
+                    }
                   />
 
                   {field.type === "multiple_choice" && (
@@ -185,7 +195,11 @@ export default function Index() {
                                 <MuiTextField
                                   value={option}
                                   onChange={(e) =>
-                                    handleOptionChange(index, optionIdx, e.target.value)
+                                    handleOptionChange(
+                                      index,
+                                      optionIdx,
+                                      e.target.value
+                                    )
                                   }
                                   label={`Seçenek ${optionIdx + 1}`}
                                   variant="outlined"
@@ -207,6 +221,19 @@ export default function Index() {
                       </FormControl>
                     </Box>
                   )}
+                  <Box sx={{ display: "flex", justifyContent: "end" }}>
+                    <Button
+                      onClick={() => handleDeleteQuestion(index)}
+                      sx={{
+                        backgroundColor: colors.redAccent[600],
+                        color: "white",
+                        width: "10%",
+                        m: 2,
+                      }}
+                    >
+                      Delete Question
+                    </Button>
+                  </Box>
                 </Box>
               </Box>
             ))}
@@ -246,9 +273,13 @@ export default function Index() {
               variant="outlined"
               color="secondary"
               onClick={handleAddTextQuestion}
-              sx={{ marginRight: 2, backgroundColor: colors.blueAccent[600], color: "white" }}
+              sx={{
+                marginRight: 2,
+                backgroundColor: colors.blueAccent[600],
+                color: "white",
+              }}
             >
-              Metin Sorusu Ekle
+              Add Text Question
             </Button>
             <Button
               variant="outlined"
@@ -256,11 +287,18 @@ export default function Index() {
               onClick={handleAddMultipleChoiceQuestion}
               sx={{ backgroundColor: colors.blueAccent[600], color: "white" }}
             >
-              Çoktan Seçmeli Soru Ekle
+              Add Multiple Choice Question
             </Button>
           </Box>
         </Box>
       </form>
+      <SnackbarComponent
+        open={snackbarState}
+        autoHideDuration={3000}
+        onClose={handleCloseSnackBar}
+        message={"Form Created Successfully"}
+        severity={"success"}
+      />
     </Box>
   );
 }

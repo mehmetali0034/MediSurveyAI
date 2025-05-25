@@ -180,7 +180,6 @@ const formAnswersController = {
       const formAnswerData = {
         ...req.body,
         created_by: creatorId,
-        type: 'for patients'
       };
 
       if (formAnswerData.fileId && !formAnswerData.file_id) {

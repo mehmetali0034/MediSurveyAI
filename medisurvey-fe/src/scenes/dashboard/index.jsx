@@ -6,36 +6,93 @@ import { tokens } from "../../theme";
 import { useTheme } from "@emotion/react";
 import StatBox from "../../components/StatBox";
 import EmailIcon from "@mui/icons-material/Email";
-import MonetizationOnOutlinedIcon from "@mui/icons-material/MonetizationOnOutlined";
-import PersonAddAltIcon from "@mui/icons-material/PersonAddAlt";
-import TrafficIcon from "@mui/icons-material/Traffic";
 import LineChart from "../../components/LineChart";
 import { mockTransactions } from "../../data/mockData";
 import BarChart from "../../components/BarChart";
 import GeoChart from "../../components/GeoChart";
 import ProgressCircle from "../../components/ProgressCircle";
 import DoctorService from "../../services/doctorService";
+import Groups2Icon from "@mui/icons-material/Groups2";
+import FileService from "../../services/doctorServices/FileService";
+import FolderIcon from "@mui/icons-material/Folder";
+import PatientService from "../../services/doctorServices/patientService";
+import Diversity3Icon from "@mui/icons-material/Diversity3";
+import FormService from "../../services/doctorServices/FormService";
+import DescriptionIcon from "@mui/icons-material/Description";
+import GenderPieChart from "../../components/GenderPieChart";
 
 export default function Dashboard() {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+  const doctorId = localStorage.getItem("doctorId");
   const [doctorInfo, setDoctorInfo] = useState(null);
   const doctorService = new DoctorService();
+  const patientServce = new PatientService();
+  const fileService = new FileService();
+  const formService = new FormService();
+  const [files, setFiles] = useState([]);
+  const [patients, setPatients] = useState([]);
+  const [doctorsForms, setDoctorsForms] = useState([]);
+  const [last8Patients, setLast8Patients] = useState([]);
+  useEffect(() => {
+    const fetchDoctorInfo = async () => {
+      try {
+        const info = await doctorService.getDoctorInfo();
+        setDoctorInfo(info);
+        console.log(info);
+      } catch (error) {
+        console.error("Error fetching doctor info:", error);
+      }
+    };
+    const fetchAllFiles = async () => {
+      try {
+        const response = await fileService.getAllFiles();
+        const doctorsFiles = response.filter(
+          (file) => file.created_by === doctorId
+        );
+        setFiles(doctorsFiles);
+      } catch (error) {
+        console.log("File bilgilerini çekerken bir hata oluştu:", error);
+      }
+    };
+    const fetchAllPatients = async () => {
+      try {
+        const response = await patientServce.getAllPatients();
+        const doctorsPatients = response.patients.filter(
+          (filter) => filter.doctorId === doctorId
+        );
+        setPatients(doctorsPatients);
+        const sortedPatients = response.patients.sort(
+          (a, b) => new Date(b.created_at) - new Date(a.created_at)
+        );
+        const last8Patients = sortedPatients.slice(0, 8);
+        setLast8Patients(last8Patients);
+      } catch (error) {
+        console.log("Hastalar getirilirken bir sorun yaşandı.", error);
+      }
+    };
+    const fetchAllForms = async () => {
+      try {
+        const response = await formService.getAllForms();
+        const doctorsForms = response.filter(
+          (filter) => filter.created_by === doctorId
+        );
+        setDoctorsForms(doctorsForms);
+      } catch (error) {
+        console.log("Hastalar getirilirken bir sorun yaşandı.", error);
+      }
+    };
+    fetchDoctorInfo();
+    fetchAllFiles();
+    fetchAllPatients();
+    fetchAllForms();
+  }, []);
 
-    // Component yüklendiğinde doktor bilgilerini çek
-    useEffect(() => {
-      const fetchDoctorInfo = async () => {
-        try {
-          const info = await doctorService.getDoctorInfo()
-          setDoctorInfo(info);
-          console.log(info)
-        } catch (error) {
-          console.error("Error fetching doctor info:", error);
-        }
-      };
-      fetchDoctorInfo();
-    }, []);
-  
+  const formatDateTime = (isoString) => {
+    const [date, time] = isoString.split("T");
+    const [hour, minute] = time.split(":");
+    return `${date}    ${hour}:${minute}`;
+  };
   return (
     <Box marginLeft={2} marginRight={2}>
       <Box display="flex" justifyContent="space-between">
@@ -59,10 +116,21 @@ export default function Dashboard() {
       <Box display="grid" gridTemplateColumns="repeat(4, 1fr)" gap="30px">
         <Box sx={{ gridColumn: "span 1" }}>
           <StatBox
-            title="12,361"
-            subtitle="Email Sent"
+            title={doctorInfo?.subDoctors?.length ?? ""}
+            subtitle="Total Number Of Sub Doctors"
             icon={
-              <EmailIcon
+              <Groups2Icon
+                sx={{ color: colors.greenAccent[400], fontSize: "26px" }}
+              />
+            }
+          />
+        </Box>
+        <Box sx={{ gridColumn: "span 1" }}>
+          <StatBox
+            title={patients?.length ?? " "}
+            subtitle="Total Number Of Patients"
+            icon={
+              <Diversity3Icon
                 sx={{ color: colors.greenAccent[400], fontSize: "26px" }}
               />
             }
@@ -72,10 +140,10 @@ export default function Dashboard() {
         </Box>
         <Box sx={{ gridColumn: "span 1" }}>
           <StatBox
-            title="431,225"
-            subtitle="Sales Obtained"
+            title={files?.length ?? " "}
+            subtitle="Total Number Of Files"
             icon={
-              <MonetizationOnOutlinedIcon
+              <FolderIcon
                 sx={{ color: colors.greenAccent[400], fontSize: "26px" }}
               />
             }
@@ -85,28 +153,13 @@ export default function Dashboard() {
         </Box>
         <Box sx={{ gridColumn: "span 1" }}>
           <StatBox
-            title="32,441"
-            subtitle="New Clients"
+            title={doctorsForms?.length ?? ""}
+            subtitle="Total Number Of Forms"
             icon={
-              <PersonAddAltIcon
+              <DescriptionIcon
                 sx={{ color: colors.greenAccent[400], fontSize: "26px" }}
               />
             }
-            progress="0.30"
-            increase="5"
-          />
-        </Box>
-        <Box sx={{ gridColumn: "span 1" }}>
-          <StatBox
-            title="1,325,134"
-            subtitle="Traffic Recaived"
-            icon={
-              <TrafficIcon
-                sx={{ color: colors.greenAccent[400], fontSize: "26px" }}
-              />
-            }
-            progress="0.55"
-            increase="43"
           />
         </Box>
       </Box>
@@ -146,35 +199,63 @@ export default function Dashboard() {
             }}
           >
             <Box>
-              <Typography variant="h6" ml={2} mt={2}>
-                Recent Transaction
+              <Typography
+                variant="h4"
+                ml={2}
+                mt={2}
+                fontWeight="bold"
+                letterSpacing={1}
+                sx={{
+                  borderBottom: "2px solid",
+                  borderColor: "primary.light",
+                  display: "inline-block",
+                  pb: 1,
+                }}
+              >
+                Recent Registrations
               </Typography>
             </Box>
-            {mockTransactions.map((m, index) => (
+            {last8Patients.map((m, index) => (
               <Box
-                m={2}
+                key={index}
                 display="flex"
                 justifyContent="space-between"
-                key={index}
+                alignItems="center"
+                m={2}
               >
-                <Box>
-                  <Typography>{m.txId}</Typography>
-                  <Typography>{m.user}</Typography>
+                {/* İsim - Soyisim Kutusu */}
+                <Box sx={{ flexBasis: "30%", minWidth: "60px" }}>
+                  <Typography fontWeight="bold">{m.firstName}</Typography>
+                  <Typography>{m.lastName}</Typography>
                 </Box>
-                {m.date}
+
+                {/* Tarih Kutusu */}
                 <Box
                   sx={{
+                    flexBasis: "30%",
+                    minWidth: "120px",
+                    textAlign: "center",
+                  }}
+                >
+                  <Typography color="textSecondary">
+                    {formatDateTime(m.created_at)}
+                  </Typography>
+                </Box>
+
+                {/* Dosya Sayısı Kutusu */}
+                <Box
+                  sx={{
+                    flexBasis: "10%",
+                    minWidth: "60px",
                     backgroundColor: colors.greenAccent[400],
-                    width: 60,
                     display: "flex",
                     justifyContent: "center",
                     alignItems: "center",
                     borderRadius: 1,
-                    mt: 1,
-                    mb: 1,
+                    py: 0.5,
                   }}
                 >
-                  {m.cost}
+                  <Typography>{m.fileIds?.length}</Typography>
                 </Box>
               </Box>
             ))}
@@ -192,11 +273,9 @@ export default function Dashboard() {
             gridColumn="span 1"
           >
             <Typography p={3} variant="h5">
-              Campagain
+              Gender
             </Typography>
-            <Box mt={7} display="flex" alignItems="center" justifyContent="center">
-              <ProgressCircle progress="0.44" size="125"/>
-            </Box>
+             <GenderPieChart patients={patients} />
           </Box>
           <Box
             sx={{ backgroundColor: colors.primary[400] }}
@@ -212,11 +291,12 @@ export default function Dashboard() {
           <Box
             sx={{ backgroundColor: colors.primary[400] }}
             gridColumn="span 1"
-            
           >
-            <Typography p={2} variant="h5">Geography Based Traffic</Typography>
-            <Box  height="200px"  >
-              <GeoChart  isDashboard={true} />
+            <Typography p={2} variant="h5">
+              Geography Based Traffic
+            </Typography>
+            <Box height="200px">
+              <GeoChart isDashboard={true} />
             </Box>
           </Box>
         </Box>

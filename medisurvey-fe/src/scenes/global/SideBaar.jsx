@@ -18,7 +18,6 @@ import { useNavigate } from "react-router-dom";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import DoctorService from "../../services/doctorService";
 
-
 export default function Sidebaar() {
   const theme = useTheme(); //useTheme hook'u, ThemeProvider tarafından sağlanan temayı almanıza yardımcı olur.
   const colors = tokens(theme.palette.mode); //Başlangıç olarak dark

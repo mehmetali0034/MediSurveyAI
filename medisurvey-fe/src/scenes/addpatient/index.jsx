@@ -223,7 +223,6 @@ export default function AddPatient() {
                 >
                   <MenuItem value="Male">Male</MenuItem>
                   <MenuItem value="Female">Female</MenuItem>
-                  <MenuItem value="Other">Other</MenuItem>
                 </Select>
                 {touched.gender && errors.gender && (
                   <Box sx={{ color: colors.redAccent[500] }}>

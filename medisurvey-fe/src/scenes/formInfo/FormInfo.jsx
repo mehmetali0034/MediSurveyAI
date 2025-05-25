@@ -13,12 +13,13 @@ import {
   Snackbar,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { tokens } from "../../theme";
 import FormService from "../../services/doctorServices/FormService";
 import Headeer from "../../components/Headeer";
 import PatientService from "../../services/doctorServices/patientService";
 import { DataGrid } from "@mui/x-data-grid";
+import WarningSnackbar from "../../components/SnackbarComponent";
 
 export default function FormInfo() {
   const theme = useTheme();
@@ -27,15 +28,16 @@ export default function FormInfo() {
   const patientService = new PatientService();
   const { formId } = useParams();
   const { id } = useParams();
+  const navigate = useNavigate();
   const [formInfo, setFormInfo] = useState({});
   const [patients, setPatients] = useState([]);
   const [selectedPatients, setSelectedPatients] = useState([]);
-  debugger;
   const [paginationModel, setPaginationModel] = useState({
     page: 0,
     pageSize: 5,
   });
   const [showAlert, setShowAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
 
   useEffect(() => {
     const fetchFormInfo = async () => {
@@ -120,12 +122,22 @@ export default function FormInfo() {
 
   const handleFill = () => {
     if (selectedPatients.length === 0) {
+      setAlertMessage("Please Select At Least 1 Patient");
       setShowAlert(true);
       return;
     }
-
-    console.log("Dolduruldu")
+  
+    if (selectedPatients.length > 1) {
+      setAlertMessage("You can Only Select 1 Patient");
+      setShowAlert(true);
+      return;
+    }
+  
+    navigate(`/files/${id}/${formId}/fill-out`,{
+      state: {selectedPatients}
+    })
   };
+  
 
   const handleSend = ()=>{
     if (selectedPatients.length === 0) {
@@ -133,6 +145,12 @@ export default function FormInfo() {
       return;
     }
     console.log("Gönderildi")
+  }
+  const handleEditForm =()=>{
+    navigate(`/files/${id}/${formId}/edit`)
+  }
+  const handleCloseSnackbar =()=>{
+    setShowAlert(false)
   }
   return (
     <Box>
@@ -409,6 +427,7 @@ export default function FormInfo() {
             <Button
               size="large"
               sx={{ backgroundColor: colors.blueAccent[600], mr: 2 }}
+              onClick={handleEditForm}
             >
               Edit
             </Button>
@@ -431,21 +450,7 @@ export default function FormInfo() {
             )}
           </Box>
           {showAlert && (
-            <Snackbar
-              open={showAlert}
-              autoHideDuration={3000}
-              onClose={() => setShowAlert(false)}
-              anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-            >
-              <Alert
-                onClose={() => setShowAlert(false)}
-                severity="warning"
-                variant="filled"
-                sx={{ width: "100%" }}
-              >
-                Please At Least Select 1 Patient 
-              </Alert>
-            </Snackbar>
+            <WarningSnackbar severity={"warning"} message={alertMessage} open={showAlert} autoHideDuration={3000} onClose={handleCloseSnackbar}/>
           )}
         </Box>
       </Box>
