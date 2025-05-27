@@ -15,6 +15,8 @@ import {
 import PatientService from "../../services/doctorServices/patientService";
 import Headeer from "../../components/Headeer";
 import { DataGrid } from "@mui/x-data-grid";
+import AddMrImage from "../../components/AddMrImage";
+import MrService from "../../services/doctorServices/MrService";
 
 export default function PatientProfile() {
   const theme = useTheme();
@@ -24,23 +26,44 @@ export default function PatientProfile() {
   const [patientInfo, setPatientInfo] = useState([]);
   const [dialogState, setDialogState] = useState(false);
   const navigate = useNavigate();
+  const [openAddMrDialog, setOpenAddMrDialog] = useState(false);
   const [paginationModel, setPaginationModel] = useState({
     page: 0,
     pageSize: 5,
   });
+  const mrService = new MrService();
+  const [mrInfo, setMrInfo] = useState([]);
   useEffect(() => {
-    const fetchPatientInfo = async () => {
+  const fetchPatientInfo = async () => {
+    try {
+      const response = await patientService.getPatientInfo(id);
+      console.log("Hasta bilgileri başarıyla geldi: ", response);
+      setPatientInfo(response);
+    } catch (err) {
+      console.error("Form oluşturulurken hata: ", err);
+      alert("Form oluşturulurken bir hata oluştu!");
+    }
+  };
+
+  fetchPatientInfo();
+}, [id]);
+
+useEffect(() => {
+  const fetchPatientMr = async () => {
+    if (patientInfo?.patient?.id) {
       try {
-        const response = await patientService.getPatientInfo(id);
-        console.log("Hasta bilgileri başarıyla geldi: ", response);
-        setPatientInfo(response);
-      } catch (err) {
-        console.error("Form oluşturulurken hata: ", err);
-        alert("Form oluşturulurken bir hata oluştu!");
+        const response = await mrService.getPatientMr(patientInfo.patient.id);
+        setMrInfo(response);
+        console.log("Mr bilgisi başarıyla getirildi.", response);
+      } catch (e) {
+        console.log("Mr bilgisi getirilirken bir sorun oluştu", e);
       }
-    };
-    fetchPatientInfo();
-  }, []);
+    }
+  };
+
+  fetchPatientMr();
+}, [patientInfo]);
+
 
   const handleDeletePatient = async () => {
     try {
@@ -86,42 +109,111 @@ export default function PatientProfile() {
     },
   ];
 
+  const columnsMR = [
+    {
+      field: "id",
+      headerName: "File ID",
+      cellClassName: "name-column--cell",
+      flex: 1,
+    },
+    {
+      field: "status",
+      headerName: "Status",
+      cellClassName: "name-column--cell",
+      flex: 1,
+    },
+    {
+      field: "createdAt",
+      headerName: "Created Date",
+      cellClassName: "name-column--cell",
+      flex: 1,
+      valueFormatter: (params) => {
+        return params.value?.split("T")[0]; // "2025-05-13T14:34:13.071Z" → "2025-05-13"
+      },
+    },
+    {
+      field: "actions",
+      headerName: "Actions",
+      flex: 1,
+      sortable: false,
+      filterable: false,
+      renderCell: (params) => (
+        <Button
+          variant="contained"
+          onClick={() => handleClickAnalyze(params.row.id)} // 👈 Her MR satırının id'si
+          sx={{ backgroundColor: colors.greenAccent[600] }}
+          size="small"
+        >
+          Analyze
+        </Button>
+      ),
+    },
+  ];
+
   const handleRemoveFile = async (fileIdToRemove) => {
-  try {
-    const currentFiles = patientInfo?.patient?.Files || [];
-    const currentFileIds = patientInfo?.patient?.fileIds || [];
+    try {
+      const currentFiles = patientInfo?.patient?.Files || [];
+      const currentFileIds = patientInfo?.patient?.fileIds || [];
 
-    const updatedFiles = currentFiles.filter(file => file.id !== fileIdToRemove);
-    const updatedFileIds = currentFileIds.filter(id => id !== fileIdToRemove);
+      const updatedFiles = currentFiles.filter(
+        (file) => file.id !== fileIdToRemove
+      );
+      const updatedFileIds = currentFileIds.filter(
+        (id) => id !== fileIdToRemove
+      );
 
-    const updatedPatientData = {
-      ...patientInfo.patient,
-      Files: updatedFiles,
-      fileIds: updatedFileIds,
-    };debugger
+      const updatedPatientData = {
+        ...patientInfo.patient,
+        Files: updatedFiles,
+        fileIds: updatedFileIds,
+      };
+      debugger;
 
-    await patientService.updatePatient(id, updatedPatientData);
+      await patientService.updatePatient(id, updatedPatientData);
 
-    // Yeni veriyi setState ile direkt yerleştir
-    setPatientInfo(prev => ({
-      ...prev,
-      patient: updatedPatientData,
-    }));
+      // Yeni veriyi setState ile direkt yerleştir
+      setPatientInfo((prev) => ({
+        ...prev,
+        patient: updatedPatientData,
+      }));
 
-    alert("Dosya başarıyla hastadan kaldırıldı.");
-  } catch (error) {
-    console.error("Dosya kaldırılırken hata oluştu:", error);
-    alert("Dosya kaldırılırken bir hata oluştu.");
-  }
-};
+      alert("Dosya başarıyla hastadan kaldırıldı.");
+    } catch (error) {
+      console.error("Dosya kaldırılırken hata oluştu:", error);
+      alert("Dosya kaldırılırken bir hata oluştu.");
+    }
+  };
 
+  const handleAddMr = () => {
+    setOpenAddMrDialog(true);
+  };
+
+  const handleClickAnalyze = (mrId) => {
+    navigate(`/patients/${id}/${mrId}`);
+  };
 
   return (
     <Box>
-      <Headeer
-        title={"Patient Informaiton"}
-        subtitle={"Display Patient Information"}
-      />
+      <Box sx={{ display: "flex", justifyContent: "space-between", mr: 2 }}>
+        <Headeer
+          title={"Patient Informaiton"}
+          subtitle={"Display Patient Information"}
+        />
+        <Button
+          sx={{
+            backgroundColor: colors.blueAccent[700],
+            color: colors.grey[100],
+            fontSize: "14px",
+            fontWeight: "bold",
+            padding: "10px 20px",
+            height: "50%",
+          }}
+          onClick={handleAddMr}
+        >
+          Add MR Image
+        </Button>
+      </Box>
+
       <Box
         sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}
       >
@@ -314,6 +406,72 @@ export default function PatientProfile() {
             />
           </Box>
         </Box>
+
+        {/**Hasta Mr Listesi */}
+        <Box
+          sx={{
+            width: "95%",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            ml: 2,
+            mb: 3,
+            mt: 5,
+          }}
+        >
+          <Typography
+            variant="h3"
+            component="h2"
+            gutterBottom
+            sx={{ fontWeight: "bold" }}
+          >
+            📷 Patient MR Images
+          </Typography>
+
+          <Box
+            sx={{
+              mt: 3,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: "95%",
+              "& .MuiDataGrid-root": {
+                border: "none",
+              },
+              "& .MuiDataGrid-cell": {
+                borderBottom: "none",
+              },
+              "& .name-column--cell": {
+                color: colors.greenAccent[300],
+              },
+              "& .MuiDataGrid-columnHeaders": {
+                backgroundColor: colors.blueAccent[700],
+                borderBottom: "none", //column başlığı için ayarları yapmamı sağlayan sınıf
+              },
+              "& .MuiDataGrid-virtualScroller": {
+                backgroundColor: colors.primary[400],
+              }, //Sanal kaydırıcı için ayarları yapmamı sağlayan sınıf
+              "& .MuiDataGrid-footerContainer": {
+                borderTop: "none",
+                backgroundColor: colors.blueAccent[700], //Tablonun alt footar kısmından sorumlu sınıf
+              },
+              "& .MuiCheckbox-root": {
+                color: `${colors.greenAccent[200]} !important`,
+              }, //Tablodaki checkbox kutularından sorumlu sınıf.
+            }}
+          >
+            <DataGrid
+              rows={mrInfo ?? []}
+              columns={columnsMR}
+              autoHeight
+              pagination
+              paginationModel={paginationModel}
+              rowsPerPageOptions={[5]}
+            />
+          </Box>
+        </Box>
+
         <Box
           sx={{
             display: "flex",
@@ -371,6 +529,13 @@ export default function PatientProfile() {
             </Button>
           </DialogActions>
         </Dialog>
+        {openAddMrDialog && (
+          <AddMrImage
+            open={openAddMrDialog}
+            onClose={() => setOpenAddMrDialog(false)}
+            patientId={patientInfo?.patient?.id}
+          />
+        )}
       </Box>
     </Box>
   );

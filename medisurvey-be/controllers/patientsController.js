@@ -1,4 +1,4 @@
-const { Patient, Doctor, File } = require('../models');
+const { Patient, Doctor, File, MR } = require('../models');
 const jwt = require('jsonwebtoken');
 const { Op } = require('sequelize');
 
@@ -145,7 +145,10 @@ const getPatientInfo = async (req, res) => {
     const { id } = req.params;
     const patient = await Patient.findOne({
       where: { id },
-      include: [Doctor]
+      include: [
+        { model: Doctor },
+        { model: MR }
+      ]
     });
 
     if (!patient) {
@@ -212,7 +215,8 @@ const getPatientInfoByTenant = async (req, res) => {
         {
           model: Doctor,
           where: { tenant_id: tenantId }
-        }
+        },
+        { model: MR }
       ]
     });
 
@@ -265,12 +269,18 @@ const getAllPatients = async (req, res) => {
             [Op.in]: allowedDoctorIds
           }
         },
-        include: [Doctor]
+        include: [
+          { model: Doctor },
+          { model: MR }
+        ]
       });
     } else if (role === 'doctor') {
       patients = await Patient.findAll({
         where: { doctorId: doctorId },
-        include: [Doctor]
+        include: [
+          { model: Doctor },
+          { model: MR }
+        ]
       });
     } else {
       return res.status(403).json({ message: 'Bu işlem için yetkiniz yok!' });
@@ -336,7 +346,8 @@ const getAllPatientsByTenant = async (req, res) => {
               }
             ]
           }
-        }
+        },
+        { model: MR }
       ]
     });
 

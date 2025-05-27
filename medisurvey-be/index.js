@@ -9,6 +9,8 @@ const patientRoutes = require('./routes/patient');
 const fileRoutes = require('./routes/fileRoutes');
 const formRoutes = require('./routes/formRoutes');
 const formAnswersRoutes = require('./routes/formAnswersRoutes');
+const segmentationRoutes = require('./routes/segmentationRoutes');
+const mrRoutes = require('./routes/mrRoutes');
 
 const Tenant = require('./models/Tenant');
 const Doctor = require('./models/Doctor');
@@ -16,6 +18,7 @@ const Patient = require('./models/Patient');
 const File = require('./models/File');
 const Form = require('./models/Form');
 const FormAnswers = require('./models/FormAnswers');
+const MR = require('./models/MR');
 
 Doctor.belongsTo(Tenant, { foreignKey: 'tenant_id' });
 Tenant.hasMany(Doctor, { foreignKey: 'tenant_id' });
@@ -43,6 +46,12 @@ Patient.hasMany(FormAnswers, { foreignKey: 'patient_id' });
 
 Patient.belongsTo(File, { foreignKey: 'fileId' });
 File.hasMany(Patient, { foreignKey: 'fileId' });
+
+MR.belongsTo(Doctor, { foreignKey: 'doctorId' });
+Doctor.hasMany(MR, { foreignKey: 'doctorId' });
+
+MR.belongsTo(Patient, { foreignKey: 'patientId' });
+Patient.hasMany(MR, { foreignKey: 'patientId' });
 
 dotenv.config();
 
@@ -72,6 +81,9 @@ const init = async () => {
         console.log('FormAnswers tablosu oluşturuluyor...');
         await FormAnswers.sync({ force: false });
         
+        console.log('MR tablosu oluşturuluyor...');
+        await MR.sync({ force: false });
+        
         console.log('Tüm tablolar başarıyla oluşturuldu!');
     } catch (error) {
         console.error('Hata oluştu:', error.message);
@@ -95,6 +107,8 @@ app.use('/api/auth', Auth);
 app.use('/api/files', fileRoutes);
 app.use('/api/forms', formRoutes);
 app.use('/api/form-answers', formAnswersRoutes);
+app.use('/api/segmentation', segmentationRoutes);
+app.use('/api/mr', mrRoutes);
 
 const PORT = process.env.PORT || 3232;
 

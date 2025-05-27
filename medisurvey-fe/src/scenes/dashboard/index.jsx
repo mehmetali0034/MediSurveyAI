@@ -273,7 +273,7 @@ export default function Dashboard() {
             gridColumn="span 1"
           >
             <Typography p={3} variant="h5">
-              Gender
+              Gender Discrimination
             </Typography>
              <GenderPieChart patients={patients} />
           </Box>

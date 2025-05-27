@@ -179,7 +179,7 @@ const formAnswersController = {
       
       const formAnswerData = {
         ...req.body,
-        created_by: creatorId,
+        created_by: creatorId
       };
 
       if (formAnswerData.fileId && !formAnswerData.file_id) {
