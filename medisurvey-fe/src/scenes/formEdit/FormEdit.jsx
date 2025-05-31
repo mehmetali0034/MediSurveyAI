@@ -130,7 +130,7 @@ export default function FormEdit() {
                           >
                             <MuiTextField
                               value={option}
-                              label={`Seçenek ${optionIdx + 1}`}
+                              label={`${optionIdx + 1}`}
                               variant="outlined"
                               fullWidth
                               onChange={(e) => {

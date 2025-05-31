@@ -98,7 +98,7 @@ export default function Dashboard() {
       <Box display="flex" justifyContent="space-between">
         <Headeer title="Dashboard" subtitle="Welcome to Your Dashboard" />
         <Box mt={2}>
-          <Button
+          {/**  <Button
             sx={{
               backgroundColor: colors.blueAccent[700],
               color: colors.grey[100],
@@ -109,7 +109,8 @@ export default function Dashboard() {
           >
             <DownloadIcon sx={{ mr: "10px" }} />
             Download Reports
-          </Button>
+          </Button> */}
+          
         </Box>
       </Box>
       {/*Section 2*/}
@@ -166,10 +167,9 @@ export default function Dashboard() {
       {/*Section 3*/}
       <Box mt={2}>
         <Box display="grid" gridTemplateColumns="repeat(3, 1fr)" gap="30px">
-          <Box
-            sx={{ gridColumn: "span 2", backgroundColor: colors.primary[400] }}
-          >
-            <Box display="flex" justifyContent="space-between">
+            {/**
+             * 
+             * <Box display="flex" justifyContent="space-between">
               <Box margin={2} mb={0}>
                 <Typography variant="h5">Revenue Generated</Typography>
                 <Typography
@@ -186,9 +186,15 @@ export default function Dashboard() {
                 </IconButton>
               </Box>
             </Box>
-            <Box height="250px">
-              <LineChart isDashboard={true} />
-            </Box>
+             */}
+          <Box
+            sx={{ backgroundColor: colors.primary[400] }}
+            gridColumn="span 2"
+          >
+            <Typography p={3} variant="h5">
+              Gender Discrimination
+            </Typography>
+             <GenderPieChart patients={patients} />
           </Box>
           <Box
             sx={{
@@ -268,16 +274,9 @@ export default function Dashboard() {
           gridTemplateColumns="repeat(3,1fr)"
           gap="30px"
         >
-          <Box
-            sx={{ backgroundColor: colors.primary[400] }}
-            gridColumn="span 1"
-          >
-            <Typography p={3} variant="h5">
-              Gender Discrimination
-            </Typography>
-             <GenderPieChart patients={patients} />
-          </Box>
-          <Box
+          
+           {/*
+           <Box
             sx={{ backgroundColor: colors.primary[400] }}
             gridColumn="span 1"
           >
@@ -288,7 +287,10 @@ export default function Dashboard() {
               <BarChart isDashboard={true} />
             </Box>
           </Box>
-          <Box
+           */}
+          
+          {/**
+           *  <Box
             sx={{ backgroundColor: colors.primary[400] }}
             gridColumn="span 1"
           >
@@ -299,6 +301,8 @@ export default function Dashboard() {
               <GeoChart isDashboard={true} />
             </Box>
           </Box>
+           */}
+         
         </Box>
       </Box>
     </Box>

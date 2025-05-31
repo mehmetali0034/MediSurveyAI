@@ -20,8 +20,8 @@ export default function GenderPieChart({ patients }) {
 
   return (
     <Box height={250} p={2}>
-      <ResponsiveContainer width="100%" height="100%">
-        <PieChart>
+      <ResponsiveContainer   width="100%" height="100%">
+        <PieChart >
           <Pie
             data={genderCount}
             cx="50%"
@@ -38,7 +38,7 @@ export default function GenderPieChart({ patients }) {
             ))}
           </Pie>
           <Tooltip />
-          <Legend verticalAlign="bottom" height={36} />
+          <Legend verticalAlign="bottom" height={25} />
         </PieChart>
       </ResponsiveContainer>
     </Box>

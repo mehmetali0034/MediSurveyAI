@@ -82,7 +82,7 @@ export default function Index() {
   const handleAddMultipleChoiceQuestion = () => {
     const newField = {
       type: "multiple_choice",
-      options: ["Seçenek 1", "Seçenek 2", "Seçenek 3"],
+      options: ["1", "2", "3"],
       question: "",
     };
     setFields([...fields, newField]);

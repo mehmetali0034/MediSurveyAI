@@ -35,6 +35,7 @@ import FormInfo from "./scenes/formInfo/FormInfo";
 import FormUEdit from "./scenes/formEdit/FormEdit.jsx";
 import FormFillOut from "./scenes/formFillOut/FormFillOut.jsx";
 import Analyze from "./scenes/analyze/Analyze.jsx";
+import FilledFormInfo from "./scenes/filledFormInfo/FilledFormInfo.jsx";
 
 function App() {
   const [theme, colorMode] = useMode();
@@ -87,6 +88,7 @@ function App() {
                       <Route path="/files/:id/:formId/edit" element={<FormUEdit/>}/>
                       <Route path="/files/:id/:formId/fill-out" element={<FormFillOut/>}/>
                       <Route path="/patients/:id/:mrId" element={<Analyze/>} />
+                      <Route path="/patients/:id/form/:formId" element={<FilledFormInfo/>} />
                     </Routes>
                   </main>
                 </>

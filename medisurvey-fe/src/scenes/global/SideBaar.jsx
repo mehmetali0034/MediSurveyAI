@@ -49,11 +49,12 @@ export default function Sidebaar() {
     fetchDoctorInfo();
   }, []);
   return (
-    <Box sx={{mr:2}}>
+    <Box sx={{mr:2,}}>
       <Sidebar
         rootStyles={{
           [`.${sidebarClasses.container}`]: {
             backgroundColor: `${colors.primary[400]}`,
+             height: "140vh", 
           },
         }}
         collapsed={isCollapsed}
@@ -189,7 +190,7 @@ export default function Sidebaar() {
             >
               Calendar
             </MenuItem>
-            <MenuItem
+               <MenuItem
               onClick={() => {
                 navigate("/faq");
               }}
@@ -197,6 +198,9 @@ export default function Sidebaar() {
             >
               Faq Page
             </MenuItem>
+            
+            {/**
+             * 
             <Typography
               variant="h6"
               color={colors.grey[300]}
@@ -236,6 +240,8 @@ export default function Sidebaar() {
             >
               Geography Chart
             </MenuItem>
+             */}
+         
           </Box>
         </Menu>
       </Sidebar>

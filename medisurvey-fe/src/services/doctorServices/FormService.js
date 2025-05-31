@@ -47,4 +47,22 @@ export default class FormService {
       throw error;
     }
   }
+  getAllFormAnswers = async ()=>{
+    try{
+      const response = await axiosInstance.get("http://localhost:3000/api/form-answers")
+      return response.data;
+    }catch(error){
+      console.error("Bir sorun oluştu:", error.response?.data || error.message);
+      throw error;
+    }
+  }
+  getAnsweredFormInfo = async (formId)=>{
+    try{
+      const response = await axiosInstance.get(`http://localhost:3000/api/form-answers/${formId}`)
+      return response.data;
+    }catch(error){
+      console.error("Bir sorun oluştu:", error.response?.data || error.message);
+      throw error;
+    }
+  }
 }

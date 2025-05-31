@@ -11,7 +11,6 @@ import FileService from "../../services/doctorServices/FileService";
 import { useNavigate } from "react-router-dom";
 export default function Files() {
   const theme = useTheme();
-  debugger;
   const colors = tokens(theme.palette.mode);
   const fileService = new FileService();
   const navigate = useNavigate();

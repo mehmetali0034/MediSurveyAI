@@ -32,39 +32,36 @@ export default function Faq() {
         <Accordion>
           <AccordionSummary expandIcon={<ExpandMoreIcon />}> 
             <Typography variant="h5" color={colors.greenAccent[500]}>
-              Another Important Question
+              How Can I Display Answered Form By Patient? 
             </Typography>
           </AccordionSummary>
           <AccordionDetails>
             <Typography>
-              Nulla facilisi. Phasellus sollicitudin nulla et quam mattis
-              feugiat. Aliquam eget maximus est, id dignissim quam.
+              You can See Form that Answered by Patient in the Patient Profile Page.
             </Typography>
           </AccordionDetails>
         </Accordion>
         <Accordion>
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             <Typography variant="h5" color={colors.greenAccent[500]}>
-              Your Favourite Question
+              Which Type of MR Segmentation Can I Have? 
             </Typography>
           </AccordionSummary>
           <AccordionDetails expandIcon={<ExpandMoreIcon />}>
             <Typography>
-              Nulla facilisi. Phasellus sollicitudin nulla et quam mattis
-              feugiat. Aliquam eget maximus est, id dignissim quam.
+              You Can Have Tibia, Femur, Fibule and Merged Type of MR Segmentation.
             </Typography>
           </AccordionDetails>
         </Accordion >
         <Accordion>
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             <Typography variant="h5" color={colors.greenAccent[500]}>
-              Some Random Question
+              What is the Purpose of the Created form by Doctor in the File?
             </Typography>
           </AccordionSummary>
           <AccordionDetails>
             <Typography>
-              Nulla facilisi. Phasellus sollicitudin nulla et quam mattis
-              feugiat. Aliquam eget maximus est, id dignissim quam.
+              Purpose of the Created Form is Filling by Asking Patient and Filling by Doctor
             </Typography>
           </AccordionDetails>
         </Accordion>

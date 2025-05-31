@@ -17,13 +17,16 @@ import Headeer from "../../components/Headeer";
 import { DataGrid } from "@mui/x-data-grid";
 import AddMrImage from "../../components/AddMrImage";
 import MrService from "../../services/doctorServices/MrService";
+import FormService from "../../services/doctorServices/FormService";
 
 export default function PatientProfile() {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const { id } = useParams();
   const patientService = new PatientService();
+  const formService = new FormService();
   const [patientInfo, setPatientInfo] = useState([]);
+  const [answeredForms, setAnsweredForms] = useState([])
   const [dialogState, setDialogState] = useState(false);
   const navigate = useNavigate();
   const [openAddMrDialog, setOpenAddMrDialog] = useState(false);
@@ -45,7 +48,37 @@ export default function PatientProfile() {
     }
   };
 
+  const fetchAnsweredForms = async () => {
+    try {
+      const response = await formService.getAllFormAnswers();
+      const filteredAnsweredForm = response?.filter(
+        (form) => form.patient_id === id
+      );
+
+      const withScores = filteredAnsweredForm.map((form) => {
+        const totalScore = form.questions.reduce((acc, question) => {
+          if (question.type === "multiple_choice") {
+            const numericAnswer = parseFloat(question.answer);
+            return acc + (isNaN(numericAnswer) ? 0 : numericAnswer);
+          }
+          return acc;
+        }, 0);
+
+        return {
+          ...form,
+          totalScore,
+        };
+      });
+
+      setAnsweredForms(withScores);
+    } catch (err) {
+      console.error("Formlar getirilirken hata:", err);
+      alert("Formlar getirilirken bir hata oluştu!");
+    }
+  };
+
   fetchPatientInfo();
+  fetchAnsweredForms();
 }, [id]);
 
 useEffect(() => {
@@ -62,7 +95,7 @@ useEffect(() => {
   };
 
   fetchPatientMr();
-}, [patientInfo]);
+}, [patientInfo,mrInfo]);
 
 
   const handleDeletePatient = async () => {
@@ -150,6 +183,43 @@ useEffect(() => {
     },
   ];
 
+  const columnsAnsweredForms = [
+    {
+      field: "name",
+      headerName: "Form Name",
+      cellClassName: "name-column--cell",
+      flex: 1,
+    },
+    {
+    field: "Form.File.name",
+    headerName: "File Name",
+    flex: 1,
+    valueGetter: (params) => params.row.Form?.File?.name || "",
+    cellClassName: "name-column--cell",
+  },
+   {
+  field: "totalScore",
+  headerName: "Total Score",
+  flex: 1,
+  cellClassName: "name-column--cell",
+},
+    {
+      field: "type",
+      headerName: "Type",
+      cellClassName: "name-column--cell",
+      flex: 1,
+    },
+     {
+      field: "createdAt",
+      headerName: "Created Date",
+      cellClassName: "name-column--cell",
+      flex: 1,
+      valueFormatter: (params) => {
+        return params.value?.split("T")[0]; // "2025-05-13T14:34:13.071Z" → "2025-05-13"
+      },
+    },
+  ]
+
   const handleRemoveFile = async (fileIdToRemove) => {
     try {
       const currentFiles = patientInfo?.patient?.Files || [];
@@ -191,6 +261,10 @@ useEffect(() => {
   const handleClickAnalyze = (mrId) => {
     navigate(`/patients/${id}/${mrId}`);
   };
+
+  const handleRowClick =(params)=>{
+    navigate(`/patients/${id}/form/${params.id}`)
+  }
 
   return (
     <Box>
@@ -471,7 +545,72 @@ useEffect(() => {
             />
           </Box>
         </Box>
+{/**Hasta Cevaplanan Formlar */}
 
+       <Box
+          sx={{
+            width: "95%",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            ml: 2,
+            mb: 3,
+            mt: 5,
+          }}
+        >
+          <Typography
+            variant="h3"
+            component="h2"
+            gutterBottom
+            sx={{ fontWeight: "bold" }}
+          >
+            📝 Filled Forms For Patient
+          </Typography>
+
+          <Box
+            sx={{
+              mt: 3,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: "95%",
+              "& .MuiDataGrid-root": {
+                border: "none",
+              },
+              "& .MuiDataGrid-cell": {
+                borderBottom: "none",
+              },
+              "& .name-column--cell": {
+                color: colors.greenAccent[300],
+              },
+              "& .MuiDataGrid-columnHeaders": {
+                backgroundColor: colors.blueAccent[700],
+                borderBottom: "none", //column başlığı için ayarları yapmamı sağlayan sınıf
+              },
+              "& .MuiDataGrid-virtualScroller": {
+                backgroundColor: colors.primary[400],
+              }, //Sanal kaydırıcı için ayarları yapmamı sağlayan sınıf
+              "& .MuiDataGrid-footerContainer": {
+                borderTop: "none",
+                backgroundColor: colors.blueAccent[700], //Tablonun alt footar kısmından sorumlu sınıf
+              },
+              "& .MuiCheckbox-root": {
+                color: `${colors.greenAccent[200]} !important`,
+              }, //Tablodaki checkbox kutularından sorumlu sınıf.
+            }}
+          >
+            <DataGrid
+              rows={answeredForms ?? []}
+              columns={columnsAnsweredForms}
+              autoHeight
+              pagination
+              paginationModel={paginationModel}
+              rowsPerPageOptions={[5]}
+              onRowClick={handleRowClick}
+            />
+          </Box>
+        </Box>
         <Box
           sx={{
             display: "flex",

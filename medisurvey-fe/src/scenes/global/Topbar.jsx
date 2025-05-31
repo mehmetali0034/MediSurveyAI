@@ -51,12 +51,15 @@ return (
             <LightModeOutlinedIcon />
           )}
         </IconButton>
-        <IconButton>
+        {/**
+         *   <IconButton>
           <NotificationsOutlinedIcon />
         </IconButton>
         <IconButton>
           <SettingsOutlinedIcon />
         </IconButton>
+         */}
+      
         <IconButton onClick={()=>{navigate("/profile")}}>
           <PersonOutlinedIcon />
         </IconButton>
