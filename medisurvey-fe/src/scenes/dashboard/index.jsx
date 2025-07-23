@@ -118,7 +118,7 @@ export default function Dashboard() {
         <Box sx={{ gridColumn: "span 1" }}>
           <StatBox
             title={doctorInfo?.subDoctors?.length ?? ""}
-            subtitle="Total Number Of Sub Doctors"
+            subtitle="Number Of Sub Doctors"
             icon={
               <Groups2Icon
                 sx={{ color: colors.greenAccent[400], fontSize: "26px" }}

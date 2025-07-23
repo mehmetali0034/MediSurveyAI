@@ -137,14 +137,26 @@ export default function FormInfo() {
       state: {selectedPatients}
     })
   };
+
+  
   
 
   const handleSend = ()=>{
     if (selectedPatients.length === 0) {
+      setAlertMessage("Please Select At Least 1 Patient");
       setShowAlert(true);
       return;
     }
-    console.log("Gönderildi")
+  
+    if (selectedPatients.length > 1) {
+      setAlertMessage("You can Only Select 1 Patient");
+      setShowAlert(true);
+      return;
+    }
+  
+    navigate(`/files/${id}/${formId}/fill-out`,{
+      state: {selectedPatients}
+    })
   }
   const handleEditForm =()=>{
     navigate(`/files/${id}/${formId}/edit`)
@@ -445,7 +457,7 @@ export default function FormInfo() {
                 size="large"
                 sx={{ backgroundColor: colors.greenAccent[600] }}
               >
-                Send
+                Fill In (For Patient)
               </Button>
             )}
           </Box>
